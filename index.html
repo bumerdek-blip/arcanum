@@ -99,19 +99,19 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
 .srow-tags{display:flex;gap:3px;align-items:center;flex-wrap:wrap;}
 
 /* PRACTICE */
-#screen-practice{padding:7px 7px 4px;padding-bottom:calc(4px + env(safe-area-inset-bottom, 0px));gap:4px;align-items:center;justify-content:flex-start;overflow-y:auto;}
-.cast-wrap{position:relative;width:100%;max-width:520px;height:calc(100vh - 368px);max-height:calc(100vh - 368px);flex-shrink:0;overflow:hidden;}
+#screen-practice{padding:7px 7px 4px;padding-bottom:calc(4px + env(safe-area-inset-bottom, 0px));gap:4px;align-items:center;justify-content:flex-start;overflow:hidden;height:100%;max-height:100%;}
+.cast-wrap{position:relative;width:100%;max-width:520px;flex:1 1 180px;min-height:180px;overflow:hidden;}
 /* Spell info panel in practice */
-.spell-info-panel{width:100%;max-width:520px;background:var(--panel);border:1px solid var(--border);padding:7px 10px;flex-shrink:0;display:none;}
+.spell-info-panel{width:100%;max-width:520px;background:var(--panel);border:1px solid var(--border);padding:6px 8px;flex-shrink:1;display:none;overflow-y:auto;}
 .spell-info-panel.show{display:block;}
-.sip-row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;margin-bottom:4px;}
-.sip-stat{background:var(--bg2);border:1px solid var(--border2);padding:4px 8px;display:flex;flex-direction:column;align-items:center;min-width:62px;flex:1;text-align:center;}
+.sip-row{display:flex;gap:4px;flex-wrap:wrap;align-items:flex-start;margin-bottom:3px;}
+.sip-stat{background:var(--bg2);border:1px solid var(--border2);padding:3px 6px;display:flex;flex-direction:column;align-items:center;min-width:56px;flex:1;text-align:center;}
 .sip-stat.wide{flex:2 1 120px;}
 .sip-stat-lbl{font-family:'Cinzel',serif;font-size:.54rem;letter-spacing:.07em;color:var(--text3);}
-.sip-stat-val{font-family:'Cinzel',serif;font-size:.82rem;margin-top:1px;}
-.sip-chain-hdr{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.08em;color:var(--text3);margin-bottom:3px;}
+.sip-stat-val{font-family:'Cinzel',serif;font-size:.78rem;margin-top:1px;}
+.sip-chain-hdr{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.07em;color:var(--text3);margin-bottom:2px;}
 .sip-chain-list{display:flex;flex-direction:column;gap:3px;}
-.sip-chain-item{display:flex;align-items:flex-start;gap:5px;font-size:.62rem;background:var(--bg2);border:1px solid;padding:3px 6px;}
+.sip-chain-item{display:flex;align-items:flex-start;gap:4px;font-size:.6rem;background:var(--bg2);border:1px solid;padding:2px 5px;}
 .sip-chain-name{font-family:'Cinzel',serif;font-size:.62rem;white-space:nowrap;flex-shrink:0;}
 .sip-chain-desc{color:var(--text2);font-size:.6rem;line-height:1.3;}
 #prac-canvas{display:block;width:100%;height:100%;border:1px solid var(--border);border-radius:4px;cursor:crosshair;touch-action:none;}
@@ -533,7 +533,7 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
 </div>
 
 <!-- SELF PRACTICE — DRILL CANVAS -->
-<div id="screen-selfprac-drill" class="screen" style="padding:7px 7px 4px;padding-bottom:calc(4px + env(safe-area-inset-bottom, 0px));gap:4px;align-items:center;justify-content:flex-start;overflow-y:auto;">
+<div id="screen-selfprac-drill" class="screen" style="padding:7px 7px 4px;padding-bottom:calc(4px + env(safe-area-inset-bottom, 0px));gap:4px;align-items:center;justify-content:flex-start;overflow:hidden;height:100%;max-height:100%;">
   <div class="sp-drill-bar">
     <button class="btn" onclick="spDrillBack()" style="padding:5px 10px;font-size:.65rem">← Back</button>
     <div style="flex:1">
@@ -551,12 +551,12 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
     <span style="color:#e84020">✕ <span id="sp-drill-miss">0</span></span>
     <span style="margin-left:auto;color:var(--text3);font-size:.6rem" id="sp-drill-pos"></span>
   </div>
-  <div class="cast-wrap" style="height:calc(100vh - 340px);max-height:calc(100vh - 340px)"><canvas id="sp-drill-canvas" style="display:block;width:100%;height:100%;border:1px solid var(--border);border-radius:4px;cursor:crosshair;touch-action:none;"></canvas></div>
+  <div class="cast-wrap"><canvas id="sp-drill-canvas" style="display:block;width:100%;height:100%;border:1px solid var(--border);border-radius:4px;cursor:crosshair;touch-action:none;"></canvas></div>
   <div id="sp-score-area" style="background:var(--bg2);border:1px solid var(--border);padding:5px 8px;font-size:.75rem;color:var(--text2);min-height:36px;display:flex;align-items:center;flex-shrink:0;width:100%;max-width:520px;gap:8px;">
     <div id="sp-score-text" style="flex:1;text-align:center">Trace the glowing pattern then lift</div>
     <button class="btn" onclick="spDrillClear()" style="padding:3px 10px;font-size:.65rem;flex-shrink:0">Clear</button>
   </div>
-  <div class="spell-info-panel" id="sp-drill-info-panel">
+  <div class="spell-info-panel" id="sp-drill-info-panel" style="flex-shrink:1;overflow-y:auto">
     <div class="sip-row" id="sp-drill-sip-stats"></div>
     <div id="sp-drill-chains-wrap" style="display:none">
       <div class="sip-chain-hdr">CHAIN REACTIONS</div>
@@ -1391,10 +1391,13 @@ var SPELLS = (function(){
 
 // Alias fixes for icon references (spells must have matching IC key or use default)
 function getSpellIcon(id) {
-  if (IC[id]) return IC[id];
-  var el = SPELLS[id] ? SPELLS[id].el : 'air';
-  var typeMap = {damage:IC.fire_el, heal:IC.water_el, shield:IC.earth_el, cc:IC.air_el, enchant:IC.enchant_ic, hex:IC.hex_ic};
-  return typeMap[SPELLS[id] ? SPELLS[id].type : 'damage'] || '?';
+  var svg;
+  if (IC[id]) { svg = IC[id]; }
+  else {
+    var typeMap = {damage:IC.fire_el, heal:IC.water_el, shield:IC.earth_el, cc:IC.air_el, enchant:IC.enchant_ic, hex:IC.hex_ic};
+    svg = typeMap[SPELLS[id] ? SPELLS[id].type : 'damage'] || IC.star;
+  }
+  return '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.3rem;height:1.3rem;vertical-align:middle;flex-shrink:0">' + svg + '</span>';
 }
 
 var INSTRUCTORS = {
@@ -2435,7 +2438,7 @@ function startPractice(){
   if(!known&&G.spellPoints<1){showNotif('No Spell Points! Gain XP to level up.');return;}
   G.curSpell=id;
   var st=STYPES[sp.type];
-  document.getElementById('prac-title').textContent=getSpellIcon(id)+' '+sp.n;
+  document.getElementById('prac-title').innerHTML=icSvg(id||'star','2rem')+' '+sp.n;
   document.getElementById('prac-title').style.color=col.c;
   document.getElementById('prac-hint').textContent=col.lbl+' '+st.lbl+' — '+odHintStr(sp.el,sp.od)+(sp.chain?' • Chainable':'');
   document.getElementById('score-text').innerHTML='<div style="color:var(--text2)">Trace the glowing pattern then lift</div>';
@@ -2677,7 +2680,7 @@ function spSetupDrillCanvas(id) {
   var col = EL[sp.el];
   var st = STYPES[sp.type];
 
-  document.getElementById('sp-drill-title').textContent = getSpellIcon(id) + ' ' + sp.n;
+  document.getElementById('sp-drill-title').innerHTML = icSvg(id||'star','1.4rem') + ' ' + sp.n;
   document.getElementById('sp-drill-title').style.color = col.c;
   document.getElementById('sp-drill-hint').textContent  = col.lbl + ' ' + st.lbl + ' — ' + odHintStr(sp.el, sp.od) + (sp.chain ? ' • Chainable' : '');
   document.getElementById('sp-score-text').innerHTML    = '<div style="color:var(--text2)">Trace the glowing pattern then lift</div>';
@@ -4079,7 +4082,7 @@ function bcUp(){
   var lbl=document.getElementById('det-label');
   var counterStr='';
   if(G.eCastEl && EL[el].counters === G.eCastEl) counterStr = ' COUNTER!';
-  lbl.textContent=getSpellIcon(bestId)+' '+sp.n+' '+bestScore+'% - '+t.lbl+counterStr;
+  lbl.innerHTML=icSvg(bestId||'star','1.2rem')+' '+sp.n+' '+bestScore+'% - '+t.lbl+counterStr;
   lbl.style.color=col.c;lbl.style.borderColor=col.c;lbl.classList.add('show');
   resolvePlayerSpell(bestId,bestScore,t);
   clearTimeout(BC.fadeT);BC.fadeT=setTimeout(function(){if(!BC.drawing)bcReset();},500);
