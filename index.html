@@ -2529,7 +2529,8 @@ function startPractice(){
   var lvReq=spellTierLevelReq(id);
   var playerLevel=getPlayerLevel(G.xp);
   if(!known&&playerLevel<lvReq){showNotif('Requires Level Level '+lvReq+' to unlock this tier!');return;}
-  if(!known&&G.spellPoints<1){showNotif('No Spell Points! Gain XP to level up.');return;}
+  var tutFreeLearn = window.TUT && window.TUT.active && !TUT._hasLearned;
+  if(!known&&G.spellPoints<1&&!tutFreeLearn){showNotif('No Spell Points! Gain XP to level up.');return;}
   G.curSpell=id;
   var st=STYPES[sp.type];
   document.getElementById('prac-title').innerHTML=icSvg(id||'star','2rem')+' '+sp.n;
@@ -2571,8 +2572,9 @@ function startPractice(){
       if(!hasLearned(id)){
         var prereq=SPELL_PREREQ[id];
         if(prereq&&!hasLearned(prereq)){showNotif('Learn '+SPELLS[prereq].n+' first!');return;}
-        if(G.spellPoints<1){showNotif('No Spell Points! Gain XP to level up.');return;}
-        G.spellPoints=Math.max(0,G.spellPoints-1);addLearned(id);
+        var tutFreeLearnNow = window.TUT && window.TUT.active && !TUT._hasLearned;
+        if(G.spellPoints<1&&!tutFreeLearnNow){showNotif('No Spell Points! Gain XP to level up.');return;}
+        if(!tutFreeLearnNow) G.spellPoints=Math.max(0,G.spellPoints-1);addLearned(id);
         showNotif('✦ Learned: '+sp.n+'!');
         saveGame();
         setTimeout(function(){buildSpellList(G.curEl,INSTRUCTORS[G.curEl].sp);},400);
@@ -5630,6 +5632,10 @@ var SND = (function(){
 // ============================================================
 (function(){
 
+  // ── Constants — the two target spells ────────────────────
+  var TUT_PRACTICE_SPELL = 'shearwind';   // step 2: already known
+  var TUT_LEARN_SPELL    = 'breezemend'; // step 4: tier-1 air heal, level 1, no prereq
+
   // ── Styles ────────────────────────────────────────────────
   var style = document.createElement('style');
   style.textContent = [
@@ -5653,7 +5659,7 @@ var SND = (function(){
     '.tut-dot.active{background:var(--gold);}',
     '#tut-skip-btn{font-family:"Cinzel",serif;font-size:.6rem;color:var(--text3);background:none;border:none;cursor:pointer;padding:3px 6px;letter-spacing:.05em;}',
     '#tut-skip-btn:hover{color:var(--text2);}',
-    // Floating guide bubble — persists on screen during interactive steps
+    // Floating guide bar — shows task during interactive steps
     '#tut-guide{position:fixed;bottom:0;left:0;right:0;z-index:2500;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,1,.36,1);pointer-events:none;}',
     '#tut-guide.show{transform:translateY(0);}',
     '#tut-guide-inner{margin:0 auto;max-width:500px;background:linear-gradient(135deg,rgba(14,12,28,.98),rgba(10,18,30,.98));border-top:2px solid var(--gold);padding:10px 14px 12px;display:flex;align-items:flex-start;gap:10px;pointer-events:auto;}',
@@ -5661,18 +5667,34 @@ var SND = (function(){
     '#tut-guide-content{flex:1;min-width:0;}',
     '#tut-guide-task{font-family:"Cinzel",serif;font-size:.72rem;color:var(--gold2);letter-spacing:.05em;margin-bottom:3px;}',
     '#tut-guide-desc{font-size:.74rem;color:var(--text2);line-height:1.5;}',
-    '#tut-guide-status{margin-top:6px;display:flex;align-items:center;gap:7px;}',
-    '#tut-guide-check{font-family:"Cinzel",serif;font-size:.68rem;padding:2px 9px;border:1px solid;letter-spacing:.05em;transition:all .25s;}',
-    '#tut-guide-check.waiting{color:var(--text3);border-color:var(--border2);}',
-    '#tut-guide-check.done{color:var(--ok);border-color:rgba(64,200,112,.6);background:rgba(64,200,112,.1);}',
-    '#tut-continue-btn{font-family:"Cinzel",serif;font-size:.68rem;letter-spacing:.06em;padding:4px 12px;border:1px solid var(--gold);background:rgba(212,168,83,.12);color:var(--gold2);cursor:pointer;display:none;transition:all .15s;}',
-    '#tut-continue-btn.show{display:block;}',
-    '#tut-continue-btn:hover{background:rgba(212,168,83,.22);}',
-    // Pulsing arrow pointer to guide attention
-    '@keyframes tutArrow{0%,100%{opacity:.7;transform:translateX(0);}50%{opacity:1;transform:translateX(4px);}}',
-    '.tut-arrow{display:inline-block;animation:tutArrow 1s ease-in-out infinite;color:var(--gold2);}',
+    // Step-done popup (replaces continue-btn — full modal popup)
+    '#tut-done-overlay{position:fixed;inset:0;background:rgba(8,9,15,.88);z-index:3100;display:none;align-items:center;justify-content:center;}',
+    '#tut-done-overlay.show{display:flex;}',
+    '#tut-done-box{width:88%;max-width:380px;background:var(--panel);border:2px solid var(--ok);box-shadow:0 0 40px rgba(64,200,112,.35);overflow:hidden;}',
+    '#tut-done-header{background:linear-gradient(135deg,#0e2010,#0a1820);padding:16px 18px 12px;border-bottom:1px solid rgba(64,200,112,.3);display:flex;align-items:center;gap:12px;}',
+    '#tut-done-icon{font-size:2rem;filter:drop-shadow(0 0 10px rgba(64,200,112,.7));}',
+    '#tut-done-title{font-family:"Cinzel",serif;font-size:.82rem;color:var(--ok);letter-spacing:.08em;}',
+    '#tut-done-sub{font-size:.64rem;color:var(--text2);margin-top:2px;font-style:italic;}',
+    '#tut-done-body{padding:14px 18px 10px;}',
+    '#tut-done-text{font-size:.84rem;color:var(--text);line-height:1.8;}',
+    '#tut-done-actions{padding:8px 18px 16px;}',
+    '#tut-done-btn{font-family:"Cinzel",serif;font-size:.74rem;letter-spacing:.07em;padding:11px 18px;border:1px solid var(--ok);background:linear-gradient(135deg,rgba(64,200,112,.15),rgba(48,180,216,.1));color:var(--ok);cursor:pointer;transition:all .15s;width:100%;}',
+    '#tut-done-btn:hover{background:linear-gradient(135deg,rgba(64,200,112,.28),rgba(48,180,216,.2));}',
+    // Highlight system
+    '@keyframes tutGlow{0%,100%{box-shadow:0 0 0 0 rgba(212,168,83,0),0 0 8px 2px rgba(212,168,83,.35);}50%{box-shadow:0 0 0 5px rgba(212,168,83,.28),0 0 22px 6px rgba(212,168,83,.7);}}',
+    '@keyframes tutGlowGreen{0%,100%{box-shadow:0 0 0 0 rgba(64,200,112,0),0 0 8px 2px rgba(64,200,112,.35);}50%{box-shadow:0 0 0 5px rgba(64,200,112,.28),0 0 22px 6px rgba(64,200,112,.7);}}',
+    '.tut-hl{position:relative;z-index:2050!important;animation:tutGlow 1.3s ease-in-out infinite!important;outline:2px solid rgba(212,168,83,.9)!important;outline-offset:2px;border-radius:2px;}',
+    '.tut-hl-green{position:relative;z-index:2050!important;animation:tutGlowGreen 1.3s ease-in-out infinite!important;outline:2px solid rgba(64,200,112,.9)!important;outline-offset:2px;border-radius:2px;}',
+    '.tut-dim{opacity:.45!important;pointer-events:none!important;filter:grayscale(.4)!important;user-select:none!important;}',
+    '#tut-dimscreen{position:fixed;inset:0;background:rgba(8,9,15,.28);z-index:1998;pointer-events:none;display:none;}',
+    '#tut-dimscreen.on{display:block;}',
   ].join('');
   document.head.appendChild(style);
+
+  // ── Dim overlay ───────────────────────────────────────────
+  var dimscreen = document.createElement('div');
+  dimscreen.id = 'tut-dimscreen';
+  document.body.appendChild(dimscreen);
 
   // ── Modal HTML ────────────────────────────────────────────
   var modal = document.createElement('div');
@@ -5693,7 +5715,7 @@ var SND = (function(){
   ].join('');
   document.body.appendChild(modal);
 
-  // ── Floating guide bubble HTML ────────────────────────────
+  // ── Floating guide bar HTML ───────────────────────────────
   var guide = document.createElement('div');
   guide.id = 'tut-guide';
   guide.innerHTML = [
@@ -5702,325 +5724,459 @@ var SND = (function(){
     '  <div id="tut-guide-content">',
     '    <div id="tut-guide-task"></div>',
     '    <div id="tut-guide-desc"></div>',
-    '    <div id="tut-guide-status">',
-    '      <div id="tut-guide-check" class="waiting">Waiting...</div>',
-    '      <button id="tut-continue-btn" onclick="tutGuideContinue()">✓ Continue <span class="tut-arrow">›</span></button>',
-    '    </div>',
     '  </div>',
     '</div>',
   ].join('');
   document.body.appendChild(guide);
 
+  // ── Step-done popup HTML ──────────────────────────────────
+  var doneOverlay = document.createElement('div');
+  doneOverlay.id = 'tut-done-overlay';
+  doneOverlay.innerHTML = [
+    '<div id="tut-done-box">',
+    '  <div id="tut-done-header">',
+    '    <div id="tut-done-icon">✦</div>',
+    '    <div><div id="tut-done-title"></div><div id="tut-done-sub"></div></div>',
+    '  </div>',
+    '  <div id="tut-done-body"><div id="tut-done-text"></div></div>',
+    '  <div id="tut-done-actions"><button id="tut-done-btn" onclick="tutDoneNext()">Continue ›</button></div>',
+    '</div>',
+  ].join('');
+  document.body.appendChild(doneOverlay);
+
   // ── Tutorial step definitions ─────────────────────────────
-  // type: 'modal'   — full-screen dialog, button advances
-  // type: 'do'      — hides modal, shows guide bubble, waits for check() to return true
+  // type:'modal' — full-screen Aldric dialog
+  // type:'do'    — interactive: shows guide bar + highlights, polls check()
   var STEPS = [
-    {
-      type: 'modal',
-      portrait: 'mage',
-      speaker: 'Headmaster Aldric',
-      role: 'Founder, Arcanum Academy',
-      text: 'Welcome, young mage. You stand at the gates of Arcanum Academy — where patterns become power. Here you will master the four elements: Air, Earth, Fire, and Water.',
-      btn: 'Tell me more ›'
-    },
-    {
-      type: 'modal',
-      portrait: 'mage',
-      speaker: 'Headmaster Aldric',
-      role: 'Founder, Arcanum Academy',
-      text: 'Magic is drawn, not spoken. In the cast field, each edge belongs to an element. Trace a rune starting near an edge to invoke it. The direction of your first stroke determines whether it\'s offensive or defensive.',
-      btn: 'Show me how to practice ›'
-    },
-    {
-      type: 'do',
-      icon: 'selfprac',
-      task: 'Cast a Spell in Practice',
-      desc: 'From the Hub, tap one of the four elemental instructors. Select any spell from their list, then tap Practice and trace the rune pattern.',
-      check: function() { return TUT._hasCast; },
-      doneText: '✦ Spell cast!'
-    },
-    {
-      type: 'modal',
-      portrait: 'mage',
-      speaker: 'Headmaster Aldric',
-      role: 'Founder, Arcanum Academy',
-      text: 'Excellent form! As you battle and level up, you\'ll earn Spell Points. Visit any Instructor in the Hub, select a spell you don\'t yet know, and trace its pattern to spend a Spell Point and learn it permanently.',
-      btn: 'I\'m ready ›'
-    },
-    {
-      type: 'do',
-      icon: 'star',
-      task: 'Learn a New Spell',
-      desc: 'From the Hub, visit Sensei Tide. Select an unlearned spell and tap Practice. Trace the rune — it will cost your 1 Water Essence to master it.',
-      check: function() { return TUT._hasLearned; },
-      doneText: '✦ Spell learned!'
-    },
-    {
-      type: 'modal',
-      portrait: 'mage',
-      speaker: 'Headmaster Aldric',
-      role: 'Founder, Arcanum Academy',
-      text: 'Every adventurer needs a weapon. You carry 10 gold — just enough to buy a Training Staff. Find The Vault in the Hub and purchase it.',
-      btn: 'On my way ›'
-    },
-    {
-      type: 'do',
-      icon: 'air_el',
-      task: 'Buy the Training Staff',
-      desc: 'From the Hub, open The Vault and purchase the Training Staff for 10 gp.',
-      check: function() { return G.inventory.indexOf('trainingStaff') >= 0; },
-      doneText: '✦ Training Staff acquired!'
-    },
-    {
-      type: 'modal',
-      portrait: 'mage',
-      speaker: 'Headmaster Aldric',
-      role: 'Founder, Arcanum Academy',
-      text: 'A weapon in your bag is worthless — it must be worn. Find the Armoury in the Hub and equip your new Training Staff so its power flows with you into battle.',
-      btn: 'Equip it ›'
-    },
-    {
-      type: 'do',
-      icon: 'equip_ic',
-      task: 'Equip the Training Staff',
-      desc: 'From the Hub, open the Armoury. Tap the Training Staff in your inventory to equip it.',
-      check: function() { return G.equipped.weapon === 'trainingStaff'; },
-      doneText: '✦ Staff equipped!'
-    },
-    {
-      type: 'modal',
-      portrait: 'mage',
-      speaker: 'Headmaster Aldric',
-      role: 'Founder, Arcanum Academy',
-      text: 'Your staff is in hand. The Whispering Forest awaits beyond the academy walls. Find the Adventure button in the Hub, then enter the first stage. Face what lies within.',
-      btn: 'For Arcanum! →'
-    },
-    {
-      type: 'do',
-      icon: 'forest',
-      task: 'Begin Your Adventure',
-      desc: 'From the Hub, tap Adventure. Select the first stage on the map and enter it.',
-      check: function() { return TUT._hasAdventured; },
-      doneText: '✦ Adventure begun!'
-    },
+    // 0
+    {type:'modal', portrait:'🧙', speaker:'Headmaster Aldric', role:'Founder, Arcanum Academy',
+     text:'Welcome, young mage. You stand at the gates of Arcanum Academy — where patterns become power. Here you will master the four elements: Air, Earth, Fire, and Water.',
+     btn:'Tell me more ›'},
+    // 1
+    {type:'modal', portrait:'🧙', speaker:'Headmaster Aldric', role:'Founder, Arcanum Academy',
+     text:'Magic is drawn, not spoken. Each edge of the cast field belongs to an element — Air at the top. Trace a rune from that edge to invoke it. The direction of your first stroke decides whether the spell attacks or defends.',
+     btn:'Show me how to practice ›'},
+    // 2 — practice Shear Wind (already known)
+    {type:'do',
+     icon:'⚡', task:'Practice: Shear Wind',
+     desc:'Tap Master Zephyr (Air) in the Hub. Select Shear Wind, then trace the glowing rune on the canvas.',
+     check: function(){ return TUT._hasCast; },
+     doneTitle:'✦ First Spell Cast!',
+     doneSub:'Shear Wind executed',
+     doneText:'Excellent! You traced the Air rune and felt the wind respond. Remember: the glowing corridor shows exactly where to draw. Stay inside it for a stronger cast.',
+     doneBtn:'Next: Learn a Spell ›'},
+    // 3
+    {type:'modal', portrait:'🧙', speaker:'Headmaster Aldric', role:'Founder, Arcanum Academy',
+     text:'As you battle and level up you earn Spell Points. Visit an Instructor, pick an unlearned spell, and trace its pattern to spend one Spell Point and master it forever. Your first spell is free.',
+     btn:'I\'m ready ›'},
+    // 4 — learn Breeze Mend (tier-1 air heal, level 1, no prereq)
+    {type:'do',
+     icon:'🌀', task:'Learn: Breeze Mend',
+     desc:'Tap Master Zephyr (Air). Select Breeze Mend, then trace its rune on the canvas to learn it.',
+     check: function(){ return TUT._hasLearned; },
+     doneTitle:'✦ New Spell Learned!',
+     doneSub:'Breeze Mend mastered',
+     doneText:'A healing spell joins your arsenal. Breeze Mend restores HP in battle — essential for surviving tough fights. Pair it with a damage spell for a powerful chain!',
+     doneBtn:'Next: Buy a Weapon ›'},
+    // 5
+    {type:'modal', portrait:'🧙', speaker:'Headmaster Aldric', role:'Founder, Arcanum Academy',
+     text:'Every adventurer needs a weapon. You carry 10 gold — just enough to buy a Training Staff. Find The Vault in the Hub and purchase it.',
+     btn:'On my way ›'},
+    // 6 — buy Training Staff
+    {type:'do',
+     icon:'⚔️', task:'Buy the Training Staff',
+     desc:'Tap The Vault in the Hub, then tap Buy on the Training Staff (10 gp).',
+     check: function(){ return G.inventory.indexOf('trainingStaff') >= 0; },
+     doneTitle:'✦ Item Purchased!',
+     doneSub:'Training Staff acquired',
+     doneText:'The Training Staff is now in your inventory. A weapon stored away does nothing — head to the Armoury to equip it.',
+     doneBtn:'Next: Equip It ›'},
+    // 7
+    {type:'modal', portrait:'🧙', speaker:'Headmaster Aldric', role:'Founder, Arcanum Academy',
+     text:'A weapon in your bag is worthless — it must be worn. Find the Armoury in the Hub and equip your Training Staff so its power flows with you into battle.',
+     btn:'Equip it ›'},
+    // 8 — equip Training Staff
+    {type:'do',
+     icon:'🛡️', task:'Equip the Training Staff',
+     desc:'Tap the Armoury in the Hub, then tap Equip on the Training Staff.',
+     check: function(){ return G.equipped.weapon === 'trainingStaff'; },
+     doneTitle:'✦ Staff Equipped!',
+     doneSub:'Ready for battle',
+     doneText:'Your Training Staff is now equipped. Its +10% damage bonus is already active. One last thing — your first adventure awaits.',
+     doneBtn:'Next: Adventure ›'},
+    // 9
+    {type:'modal', portrait:'🧙', speaker:'Headmaster Aldric', role:'Founder, Arcanum Academy',
+     text:'Your staff is in hand. The Whispering Forest awaits beyond the academy walls. Tap Adventure in the Hub, then enter the first stage. Face what lies within.',
+     btn:'For Arcanum! →'},
+    // 10 — enter first stage AND win first battle
+    {type:'do',
+     icon:'🌲', task:'Begin Your Adventure',
+     desc:'Tap Adventure in the Hub, then select the first stage and defeat your first enemy.',
+     check: function(){ return TUT._hasWon; },
+     doneTitle:'✦ First Victory!',
+     doneSub:'Adventure begun',
+     doneText:'You have stepped beyond the academy walls and proven your strength. Battle well, cast true, and grow strong.',
+     doneBtn:'Good Adventure! ✦'},
   ];
 
   // ── Tutorial state ─────────────────────────────────────────
   var TUT = window.TUT = {
-    step: 0,
-    active: false,
-    _hasCast: false,
-    _hasLearned: false,
-    _hasEquipped: false,
-    _hasAdventured: false,
-    _checkInterval: null,
-    _learnedCountAtStart: 0,
+    step:0, active:false,
+    _hasCast:false, _hasLearned:false, _hasEquipped:false, _hasAdventured:false, _hasWon:false,
+    _checkInterval:null, _learnedCountAtStart:0,
+    _pendingNextStep:-1,
   };
 
-  var TOTAL_MODAL_STEPS = (function(){
-    var n = 0;
-    for (var i = 0; i < STEPS.length; i++) if (STEPS[i].type === 'modal') n++;
-    return n;
-  })();
-  var _modalIdx = 0; // tracks modal step number for dots
-
-  function dotIndex(stepIdx) {
-    // Map a global step index to a dot position (count modal steps up to this point)
-    var n = 0;
-    for (var i = 0; i <= stepIdx && i < STEPS.length; i++) {
-      if (STEPS[i].type === 'modal') n++;
-    }
-    return n - 1;
+  // ── Dot progress bar ──────────────────────────────────────
+  var TOTAL_MODAL_STEPS = (function(){ var n=0; for(var i=0;i<STEPS.length;i++) if(STEPS[i].type==='modal') n++; return n; })();
+  function dotIndex(si){ var n=0; for(var i=0;i<=si&&i<STEPS.length;i++) if(STEPS[i].type==='modal') n++; return n-1; }
+  function renderDots(ai){
+    var el=document.getElementById('tut-dots'); el.innerHTML='';
+    for(var i=0;i<TOTAL_MODAL_STEPS;i++){ var d=document.createElement('div'); d.className='tut-dot'+(i<ai?' done':i===ai?' active':''); el.appendChild(d); }
   }
 
-  function renderDots(activeModalIdx) {
-    var dots = document.getElementById('tut-dots');
-    dots.innerHTML = '';
-    for (var i = 0; i < TOTAL_MODAL_STEPS; i++) {
-      var d = document.createElement('div');
-      d.className = 'tut-dot' + (i < activeModalIdx ? ' done' : i === activeModalIdx ? ' active' : '');
-      dots.appendChild(d);
+  // ── Highlight helpers ─────────────────────────────────────
+  function hlClear(){
+    if(_hlTimer){ clearTimeout(_hlTimer); _hlTimer=null; }
+    var h=document.querySelectorAll('.tut-hl,.tut-hl-green'); for(var i=0;i<h.length;i++) h[i].classList.remove('tut-hl','tut-hl-green');
+    var d=document.querySelectorAll('.tut-dim'); for(var j=0;j<d.length;j++) d[j].classList.remove('tut-dim');
+    dimscreen.classList.remove('on');
+  }
+  function hlMark(el,green){ if(el) el.classList.add(green?'tut-hl-green':'tut-hl'); }
+  function hlDim(el){ if(el) el.classList.add('tut-dim'); }
+  function hlAll(sel,green){ var els=document.querySelectorAll(sel); for(var i=0;i<els.length;i++) hlMark(els[i],green); }
+  function dimAll(sel){ var els=document.querySelectorAll(sel); for(var i=0;i<els.length;i++) hlDim(els[i]); }
+  function dimOn(){ dimscreen.classList.add('on'); }
+
+  // ── Per-screen highlight applier ──────────────────────────
+  var _hlTimer = null; // cancel stale pending highlight timers
+  function hlApply(stepIdx, screenId){
+    if(_hlTimer){ clearTimeout(_hlTimer); _hlTimer=null; }
+    hlClear();
+    if(!TUT.active) return;
+    var s=STEPS[stepIdx]; if(!s||s.type!=='do') return;
+    dimOn();
+
+    if(stepIdx===2){
+      // STEP 2: Practice Shear Wind (air)
+      if(screenId==='screen-hub'){
+        var hc=document.querySelectorAll('.hcard');
+        for(var i=0;i<hc.length;i++){
+          if((hc[i].getAttribute('onclick')||'').indexOf("'air'")>=0) hlMark(hc[i]); else hlDim(hc[i]);
+        }
+        dimAll('.hub-btns,.stats-strip,#hub-save-info');
+      } else if(screenId==='screen-instructor'){
+        _hlTimer=setTimeout(function(){ _hlTimer=null; hlClear(); dimOn();
+          var rows=document.querySelectorAll('#spell-list .srow');
+          for(var i=0;i<rows.length;i++){
+            if(rows[i].dataset.id===TUT_PRACTICE_SPELL) hlMark(rows[i]); else hlDim(rows[i]);
+          }
+          // Back button dimmed — tap the spell, not Back
+          dimAll('#instr-type-filters,.instr-hdr');
+          var backBtn=document.querySelector('#screen-instructor .row .btn');
+          if(backBtn) hlDim(backBtn);
+        },80);
+      } else if(screenId==='screen-practice'){
+        hlMark(document.getElementById('prac-canvas'),true);
+        hlMark(document.querySelector('#screen-practice .btn'),true);
+        dimAll('#score-area,#spell-info-panel');
+      }
+    }
+
+    else if(stepIdx===4){
+      // STEP 4: Learn Breeze Mend (air)
+      if(screenId==='screen-hub'){
+        var hc2=document.querySelectorAll('.hcard');
+        for(var j=0;j<hc2.length;j++){
+          if((hc2[j].getAttribute('onclick')||'').indexOf("'air'")>=0) hlMark(hc2[j]); else hlDim(hc2[j]);
+        }
+        dimAll('.hub-btns,.stats-strip,#hub-save-info');
+      } else if(screenId==='screen-instructor'){
+        _hlTimer=setTimeout(function(){ _hlTimer=null; hlClear(); dimOn();
+          var rows2=document.querySelectorAll('#spell-list .srow');
+          for(var i=0;i<rows2.length;i++){
+            if(rows2[i].dataset.id===TUT_LEARN_SPELL) hlMark(rows2[i]); else hlDim(rows2[i]);
+          }
+          // Back button dimmed — only the target spell is the action
+          dimAll('#instr-type-filters,.instr-hdr');
+          var backBtn=document.querySelector('#screen-instructor .row .btn');
+          if(backBtn) hlDim(backBtn);
+        },80);
+      } else if(screenId==='screen-practice'){
+        hlMark(document.getElementById('prac-canvas'),true);
+        // Back goes to instructor; dim score/info, highlight canvas only
+        dimAll('#score-area,#spell-info-panel');
+        // Show back button as subtle escape (green) only after canvas
+        var pbBtn=document.querySelector('#screen-practice .btn');
+        if(pbBtn) hlMark(pbBtn,true);
+      }
+    }
+
+    else if(stepIdx===6){
+      // STEP 6: Buy Training Staff
+      if(screenId==='screen-hub'){
+        var hc3=document.querySelectorAll('.hcard');
+        for(var k=0;k<hc3.length;k++){
+          if((hc3[k].getAttribute('onclick')||'').indexOf('goShop')>=0) hlMark(hc3[k]); else hlDim(hc3[k]);
+        }
+        dimAll('.hub-btns,.stats-strip,#hub-save-info');
+      } else if(screenId==='screen-shop'){
+        _hlTimer=setTimeout(function(){ _hlTimer=null; hlClear(); dimOn();
+          var items=document.querySelectorAll('#shop-list .shop-item');
+          for(var i=0;i<items.length;i++){
+            var nm=items[i].querySelector('.shop-name');
+            if(nm&&nm.textContent.toLowerCase().indexOf('training staff')>=0) hlMark(items[i]); else hlDim(items[i]);
+          }
+          hlMark(document.querySelector('#screen-shop .btn'),true);
+        },80);
+      }
+    }
+
+    else if(stepIdx===8){
+      // STEP 8: Equip Training Staff
+      if(screenId==='screen-hub'){
+        var hc4=document.querySelectorAll('.hcard');
+        for(var m=0;m<hc4.length;m++){
+          if((hc4[m].getAttribute('onclick')||'').indexOf('goEquip')>=0) hlMark(hc4[m]); else hlDim(hc4[m]);
+        }
+        dimAll('.hub-btns,.stats-strip,#hub-save-info');
+      } else if(screenId==='screen-equip'){
+        _hlTimer=setTimeout(function(){ _hlTimer=null; hlClear(); dimOn();
+          var inv=document.querySelectorAll('#inv-list .inv-item');
+          for(var i=0;i<inv.length;i++){
+            var nm2=inv[i].querySelector('.sname');
+            if(nm2&&nm2.textContent.toLowerCase().indexOf('training staff')>=0) hlMark(inv[i]); else hlDim(inv[i]);
+          }
+          hlMark(document.querySelector('#screen-equip .btn'),true);
+          dimAll('.eslot');
+        },80);
+      }
+    }
+
+    else if(stepIdx===10){
+      // STEP 10: Adventure
+      if(screenId==='screen-hub'){
+        hlMark(document.querySelector('.hub-btns .btn.primary'));
+        dimAll('.hcard,.stats-strip,#hub-save-info');
+        dimAll('.hub-btns .btn:not(.primary)');
+      }
     }
   }
 
-  function showModal(stepIdx) {
-    var s = STEPS[stepIdx];
-    document.getElementById('tut-portrait').textContent = s.portrait;
-    document.getElementById('tut-speaker').textContent = s.speaker;
-    document.getElementById('tut-role').textContent = s.role;
-    document.getElementById('tut-text').textContent = s.text;
-    document.getElementById('tut-main-btn').textContent = s.btn;
-    document.getElementById('tut-main-btn').onclick = function(){ advanceFrom(stepIdx); };
+  // ── Modal helpers ─────────────────────────────────────────
+  function showModal(stepIdx){
+    hlClear();
+    var s=STEPS[stepIdx];
+    document.getElementById('tut-portrait').textContent=s.portrait;
+    document.getElementById('tut-speaker').textContent=s.speaker;
+    document.getElementById('tut-role').textContent=s.role;
+    document.getElementById('tut-text').textContent=s.text;
+    document.getElementById('tut-main-btn').textContent=s.btn;
+    document.getElementById('tut-main-btn').onclick=function(){ advanceFrom(stepIdx); };
     renderDots(dotIndex(stepIdx));
     hideGuide();
     document.getElementById('tut-modal').classList.add('show');
   }
+  function hideModal(){ document.getElementById('tut-modal').classList.remove('show'); }
 
-  function hideModal() {
-    document.getElementById('tut-modal').classList.remove('show');
-  }
-
-  function showGuide(stepIdx) {
-    var s = STEPS[stepIdx];
-    document.getElementById('tut-guide-icon').textContent = s.icon;
-    document.getElementById('tut-guide-task').textContent = s.task;
-    document.getElementById('tut-guide-desc').textContent = s.desc;
-    var chk = document.getElementById('tut-guide-check');
-    chk.className = 'waiting';
-    chk.textContent = 'Waiting...';
-    document.getElementById('tut-continue-btn').classList.remove('show');
+  // ── Guide bar helpers ─────────────────────────────────────
+  function showGuide(stepIdx){
+    var s=STEPS[stepIdx];
+    document.getElementById('tut-guide-icon').textContent=s.icon;
+    document.getElementById('tut-guide-task').textContent=s.task;
+    document.getElementById('tut-guide-desc').textContent=s.desc;
     document.getElementById('tut-guide').classList.add('show');
   }
-
-  function hideGuide() {
+  function hideGuide(){
     document.getElementById('tut-guide').classList.remove('show');
-    if (TUT._checkInterval) { clearInterval(TUT._checkInterval); TUT._checkInterval = null; }
+    if(TUT._checkInterval){ clearInterval(TUT._checkInterval); TUT._checkInterval=null; }
   }
 
-  function startDoStep(stepIdx) {
-    var s = STEPS[stepIdx];
+  // ── Step-done popup ───────────────────────────────────────
+  function showDonePopup(stepIdx){
+    hlClear();
+    var s=STEPS[stepIdx];
+    document.getElementById('tut-done-icon').textContent=s.icon;
+    document.getElementById('tut-done-title').textContent=s.doneTitle;
+    document.getElementById('tut-done-sub').textContent=s.doneSub;
+    document.getElementById('tut-done-text').textContent=s.doneText;
+    document.getElementById('tut-done-btn').textContent=s.doneBtn;
+    TUT._pendingNextStep=stepIdx+1;
+    document.getElementById('tut-done-overlay').classList.add('show');
+  }
+
+  window.tutDoneNext=function(){
+    document.getElementById('tut-done-overlay').classList.remove('show');
+    var next=TUT._pendingNextStep; TUT._pendingNextStep=-1;
+    if(next<0||next>=STEPS.length){ tutComplete(); return; }
+    TUT.step=next;
+    var s=STEPS[next];
+    if(s.type==='modal') showModal(next); else startDoStep(next);
+  };
+
+  // ── Main do-step driver ───────────────────────────────────
+  // Steps 2,4 start from hub; steps 6,8,10 also start from hub.
+  // If a do-step begins while player is on practice/instructor/shop/equip, send them to hub first.
+  var HUB_START_STEPS = {2:1, 4:1, 6:1, 8:1, 10:1};
+  var NON_HUB_SCREENS = {'screen-practice':1,'screen-instructor':1,'screen-shop':1,'screen-equip':1,'screen-selfprac':1};
+
+  function startDoStep(stepIdx){
+    var s=STEPS[stepIdx];
     hideModal();
     showGuide(stepIdx);
-    // Poll for completion
-    TUT._checkInterval = setInterval(function(){
-      if (!TUT.active) { clearInterval(TUT._checkInterval); return; }
-      if (s.check && s.check()) {
-        clearInterval(TUT._checkInterval);
-        TUT._checkInterval = null;
-        var chk = document.getElementById('tut-guide-check');
-        chk.className = 'done';
-        chk.textContent = s.doneText;
-        document.getElementById('tut-continue-btn').classList.add('show');
-      }
-    }, 400);
-  }
-
-  function advanceFrom(stepIdx) {
-    var nextIdx = stepIdx + 1;
-    if (nextIdx >= STEPS.length) {
-      tutSkip();
-      return;
-    }
-    TUT.step = nextIdx;
-    var next = STEPS[nextIdx];
-    if (next.type === 'modal') {
-      showModal(nextIdx);
+    var active=document.querySelector('.screen.active');
+    var activeId = active ? active.id : 'screen-hub';
+    // If this step starts from hub but player is elsewhere, navigate home first
+    if(HUB_START_STEPS[stepIdx] && NON_HUB_SCREENS[activeId]){
+      goHub(); // showScreen('screen-hub') — the showScreen hook will call hlApply
     } else {
-      startDoStep(nextIdx);
+      hlApply(stepIdx, activeId);
     }
+    TUT._checkInterval=setInterval(function(){
+      if(!TUT.active){ clearInterval(TUT._checkInterval); return; }
+      if(s.check&&s.check()){
+        clearInterval(TUT._checkInterval); TUT._checkInterval=null;
+        hideGuide();
+        showDonePopup(stepIdx);
+      }
+    },400);
   }
 
-  window.tutGuideContinue = function() {
-    advanceFrom(TUT.step);
-  };
+  function advanceFrom(stepIdx){
+    var ni=stepIdx+1;
+    if(ni>=STEPS.length){ tutSkip(); return; }
+    TUT.step=ni;
+    var s=STEPS[ni];
+    if(s.type==='modal') showModal(ni); else startDoStep(ni);
+  }
 
-  window.tutSkip = function() {
-    TUT.active = false;
-    hideModal();
-    hideGuide();
+  window.tutGuideContinue=function(){ advanceFrom(TUT.step); };
+
+  window.tutSkip=function(){
+    TUT.active=false; hlClear(); hideModal(); hideGuide();
+    document.getElementById('tut-done-overlay').classList.remove('show');
     saveGame();
   };
 
-  window.tutComplete = function() {
-    if (!TUT.active) return;
-    TUT.active = false;
-    hideGuide();
-    // Gift: 1 spell point + 20 gold
-    G.spellPoints += 1;
-    G.gold += 20;
-    saveGame();
-    // Show farewell modal
-    document.getElementById('tut-portrait').innerHTML = IC.player;
-    document.getElementById('tut-speaker').textContent = 'Headmaster Aldric';
-    document.getElementById('tut-role').textContent = 'Founder, Arcanum Academy';
-    document.getElementById('tut-text').textContent = 'Your training is complete, young mage. You have proven yourself worthy of these halls. The world beyond is vast — grow strong, learn well, and may the elements guide your hand.';
-    // Replace actions area with gift display + single close button
-    document.getElementById('tut-actions').innerHTML = [
-      '<div style="background:rgba(212,168,83,.08);border:1px solid rgba(212,168,83,.35);padding:9px 12px;font-size:.75rem;color:var(--gold2);font-family:Cinzel,serif;text-align:center;line-height:1.9">',
-      '  Aldric\'s Parting Gift<br>',
-      '  <span style="color:var(--text)">+1 Spell Point &nbsp;+20 Gold</span>',
-      '</div>',
-      '<button id="tut-main-btn" style="font-family:Cinzel,serif;font-size:.74rem;letter-spacing:.07em;padding:10px 18px;border:1px solid var(--gold);background:linear-gradient(135deg,#2a1a6a,#1a2a40);color:var(--gold2);cursor:pointer;width:100%" onclick="tutDismiss()">',
-      '  Good Adventure! ✦',
-      '</button>',
-    ].join('');
-    // Hide progress dots and skip button
-    document.getElementById('tut-dots').innerHTML = '';
-    document.getElementById('tut-skip-btn').style.display = 'none';
+  window.tutComplete=function(){
+    if(!TUT.active) return;
+    TUT.active=false; hlClear(); hideGuide();
+    document.getElementById('tut-done-overlay').classList.remove('show');
+    G.spellPoints+=1; G.gold+=20; saveGame();
+    document.getElementById('tut-portrait').textContent='🧙';
+    document.getElementById('tut-speaker').textContent='Headmaster Aldric';
+    document.getElementById('tut-role').textContent='Founder, Arcanum Academy';
+    document.getElementById('tut-text').textContent='Your training is complete, young mage. You have proven yourself worthy of these halls. The world beyond is vast — grow strong, learn well, and may the elements guide your hand.';
+    document.getElementById('tut-actions').innerHTML=
+      '<div style="background:rgba(212,168,83,.08);border:1px solid rgba(212,168,83,.35);padding:9px 12px;font-size:.75rem;color:var(--gold2);font-family:Cinzel,serif;text-align:center;line-height:1.9">'
+      +'Aldric\'s Parting Gift<br><span style="color:var(--text)">+1 Spell Point &nbsp;+20 Gold</span></div>'
+      +'<button id="tut-main-btn" style="font-family:Cinzel,serif;font-size:.74rem;letter-spacing:.07em;padding:10px 18px;border:1px solid var(--gold);background:linear-gradient(135deg,#2a1a6a,#1a2a40);color:var(--gold2);cursor:pointer;width:100%" onclick="tutDismiss()">Good Adventure! ✦</button>';
+    document.getElementById('tut-dots').innerHTML='';
+    document.getElementById('tut-skip-btn').style.display='none';
     document.getElementById('tut-modal').classList.add('show');
   };
 
-  window.tutDismiss = function() {
+  window.tutDismiss=function(){
     document.getElementById('tut-modal').classList.remove('show');
-    document.getElementById('tut-skip-btn').style.display = '';
+    document.getElementById('tut-skip-btn').style.display='';
     goHub();
   };
 
-  window.showStory = function() {
-    TUT.active = true;
-    TUT.step = 0;
-    TUT._hasCast = false;
-    TUT._hasLearned = false;
-    TUT._hasEquipped = false;
-    TUT._hasAdventured = false;
-    TUT._learnedCountAtStart = learnedList().length;
-    showModal(0);
+  window.showStory=function(){
+    TUT.active=true; TUT.step=0;
+    TUT._hasCast=false; TUT._hasLearned=false; TUT._hasEquipped=false; TUT._hasAdventured=false; TUT._hasWon=false;
+    TUT._learnedCountAtStart=learnedList().length;
+    hlClear(); showModal(0);
   };
 
-  // ── Hook into game events to detect tutorial task completion ──
-
-  // 1. Detect spell cast in practice (pracUp fires when finger lifts)
-  var _origPracUp = window.pracUp;
-  // We wrap at end of boot so it captures the latest pracUp (already may have been wrapped by SND)
-  setTimeout(function(){
-    var _latestPracUp = pracUp;
-    pracUp = function(){
-      _latestPracUp.apply(this, arguments);
-      if (TUT.active) TUT._hasCast = true;
-    };
-  }, 0);
-
-  // 2. Detect spell learned (addLearned fires when a new spell is mastered)
-  var _origAddLearned = addLearned;
-  addLearned = function(id){
-    _origAddLearned.apply(this, arguments);
-    if (TUT.active) TUT._hasLearned = true;
-  };
-
-  // 3. Detect item equipped
-  var _origEquipItem = equipItem;
-  equipItem = function(id){
-    _origEquipItem.apply(this, arguments);
-    if (TUT.active) TUT._hasEquipped = true;
-  };
-
-  // 4. Detect adventure entered (startBattle fires when entering a stage)
-  // Also hide the guide bar during battle so it doesn't cover the cast field.
-  var _origStartBattle = null;
-  setTimeout(function(){
-    _origStartBattle = startBattle;
-    startBattle = function(){
-      _origStartBattle.apply(this, arguments);
-      if (TUT.active) TUT._hasAdventured = true;
-    };
-  }, 0);
-
-  // Hide/show guide based on which screen is active
-  var _origShowScreen = showScreen;
-  var GUIDE_HIDDEN_SCREENS = {'screen-battle':1,'screen-loot':1,'screen-adventure':1};
-  showScreen = function(id) {
-    _origShowScreen.apply(this, arguments);
-    if (!TUT.active) return;
-    var s = STEPS[TUT.step];
-    if (!s || s.type !== 'do') return;
-    if (GUIDE_HIDDEN_SCREENS[id]) {
-      // Always hide guide on these screens — don't cover the map/battle
-      document.getElementById('tut-guide').classList.remove('show');
-    } else {
-      // Restore guide on all other screens
+  // ── Screen change hook ────────────────────────────────────
+  var _origShowScreen=showScreen;
+  var GUIDE_HIDDEN={'screen-battle':1,'screen-loot':1,'screen-adventure':1};
+  showScreen=function(id){
+    _origShowScreen.apply(this,arguments);
+    if(!TUT.active) return;
+    var s=STEPS[TUT.step]; if(!s||s.type!=='do') return;
+    if(GUIDE_HIDDEN[id]){ document.getElementById('tut-guide').classList.remove('show'); hlClear(); }
+    else {
       document.getElementById('tut-guide').classList.add('show');
+      // Use a short delay only for screens that need DOM to render first (shop, equip, instructor)
+      // For hub, apply immediately to win the race against buildSpellList hooks
+      if(id==='screen-hub') hlApply(TUT.step, id);
+      else _hlTimer=setTimeout(function(){ _hlTimer=null; hlApply(TUT.step, id); }, 80);
     }
   };
+
+  // ── Re-highlight after spell list rebuilds (filter changes etc.) ──
+  // Only fire if we're already on screen-instructor — don't override hub highlights
+  var _origBuildSpellList=buildSpellList;
+  buildSpellList=function(el,ids){
+    _origBuildSpellList.apply(this,arguments);
+    if(!TUT.active) return;
+    var step=TUT.step;
+    if((step===2||step===4) && document.getElementById('screen-instructor').classList.contains('active')){
+      if(_hlTimer){ clearTimeout(_hlTimer); _hlTimer=null; }
+      _hlTimer=setTimeout(function(){ _hlTimer=null; hlApply(step,'screen-instructor'); },100);
+    }
+    // After list renders, wrap the target spell row's onclick so tapping it
+    // spotlights the injected Practice button (and dims Back)
+    if(step===2||step===4){
+      var targetId = step===2 ? TUT_PRACTICE_SPELL : TUT_LEARN_SPELL;
+      var rows=document.querySelectorAll('#spell-list .srow');
+      for(var r=0;r<rows.length;r++){
+        if(rows[r].dataset.id===targetId){
+          (function(row){
+            var _origOnclick=row.onclick;
+            row.onclick=function(e){
+              if(_origOnclick) _origOnclick.call(this,e);
+              // After a tick the Practice button is injected — highlight it
+              setTimeout(function(){
+                if(!TUT.active) return;
+                var pb=row.querySelector('.inline-prac-btn');
+                hlClear(); dimOn();
+                hlMark(row); // keep row highlighted
+                if(pb) hlMark(pb,true); // Practice button glows green
+                dimAll('#instr-type-filters,.instr-hdr');
+                var backBtn=document.querySelector('#screen-instructor .row .btn');
+                if(backBtn) hlDim(backBtn);
+              },10);
+            };
+          })(rows[r]);
+          break;
+        }
+      }
+    }
+  };
+
+  // goShop / goEquip / goInstructor — showScreen hook already handles the highlight;
+  // these wrappers are only needed to preserve the original function references.
+  var _origGoShop=goShop;
+  goShop=function(){ _origGoShop.apply(this,arguments); };
+
+  var _origGoEquip=goEquip;
+  goEquip=function(){ _origGoEquip.apply(this,arguments); };
+
+  var _origGoInstructor=goInstructor;
+  goInstructor=function(el){ _origGoInstructor.apply(this,arguments); };
+
+  // ── Event detection ───────────────────────────────────────
+  setTimeout(function(){
+    var _pu=pracUp;
+    pracUp=function(){ _pu.apply(this,arguments); if(TUT.active&&TUT.step===2) TUT._hasCast=true; };
+  },0);
+
+  var _origAddLearned=addLearned;
+  addLearned=function(id){
+    _origAddLearned.apply(this,arguments);
+    if(TUT.active&&TUT.step===4&&id===TUT_LEARN_SPELL) TUT._hasLearned=true;
+  };
+
+  var _origEquipItem=equipItem;
+  equipItem=function(id){ _origEquipItem.apply(this,arguments); if(TUT.active) TUT._hasEquipped=true; };
+
+  setTimeout(function(){
+    var _sb=startBattle;
+    startBattle=function(){ _sb.apply(this,arguments); if(TUT.active) TUT._hasAdventured=true; };
+  },0);
 
 })();
 
@@ -6143,14 +6299,14 @@ goHub = function() {
 // Wrap battleWin to show unlock notifications for new stages/areas
 var _origBattleWin = battleWin;
 battleWin = function() {
-  // Capture which stage we're on before calling through
   var stageIdx = G.curStage;
   var wasDone = G.stagesDone[stageIdx];
   _origBattleWin.apply(this, arguments);
-  // Tutorial completion — fires on first ever battle won
-  if (window.TUT && window.TUT._hasAdventured) {
-    setTimeout(function() { window.tutComplete(); }, 800);
-    return;
+  // Tutorial: mark first win so step 10 check resolves
+  if (window.TUT && window.TUT.active) {
+    TUT._hasAdventured = true;
+    TUT._hasWon = true;
+    return; // don't show unlock banners during tutorial
   }
   // Check for unlocks (battleWin sets stagesDone and unlocks next)
   if (!wasDone && G.stagesDone[stageIdx]) {
@@ -6172,8 +6328,8 @@ battleWin = function() {
 var _origBattleLose = battleLose;
 battleLose = function() {
   _origBattleLose.apply(this, arguments);
-  if (window.TUT && window.TUT._hasAdventured) {
-    setTimeout(function() { window.tutComplete(); }, 800);
+  if (window.TUT && window.TUT.active && TUT._hasAdventured) {
+    TUT._hasWon = true; // loss still counts as completing the adventure step
   }
 };
 
