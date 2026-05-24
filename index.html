@@ -16,8 +16,8 @@
   --enchant:#c080ff;--hex:#ff40a0;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Crimson Text',serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;user-select:none;}
-#app{width:100vw;height:100vh;}
+body{font-family:'Crimson Text',serif;background:var(--bg);color:var(--text);height:100dvh;overflow:hidden;user-select:none;}
+#app{width:100vw;height:100dvh;}
 .screen{display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;}
 .screen.active{display:flex;}
 h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
@@ -239,7 +239,7 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
 #enemy-log-float .blog-msg{position:relative;left:auto;transform:none;margin:2px auto;animation:blogFadeCenter 2s ease-out forwards;}
 @keyframes blogFadeCenter{0%{opacity:1;transform:translateY(0);}70%{opacity:.9;transform:translateY(-10px);}100%{opacity:0;transform:translateY(-20px);}}
 /* chain-banner now inside cf-inner */
-.chain-banner{background:linear-gradient(135deg,rgba(42,18,80,.95),rgba(80,18,42,.95));border:1px solid rgba(192,128,255,.6);padding:3px 8px;font-family:'Cinzel',serif;font-size:.7rem;color:#d0a0ff;text-align:center;letter-spacing:.04em;position:absolute;left:0;right:0;top:0;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;}
+.chain-banner{background:linear-gradient(135deg,rgba(42,18,80,.95),rgba(80,18,42,.95));border:1px solid rgba(192,128,255,.6);padding:3px 8px;font-family:'Cinzel',serif;font-size:.7rem;color:#d0a0ff;text-align:center;letter-spacing:.04em;position:absolute;left:0;right:0;top:4px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;}
 .chain-banner.show{opacity:1;}
 /* chain-banner styles moved to player-hud section */
 .cf-wrap{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
@@ -4117,7 +4117,7 @@ function showCountdown(enemy, cb){
     cdNum.classList.add('cd-number');
     ci++;setTimeout(nextCount,700);
   }
-  setTimeout(nextCount,400);
+  nextCount();
 }
 
 function initBC(){
@@ -6345,6 +6345,348 @@ battleLose = function() {
   // Initialize title element pips
   goHub(); // sets up hub state
   showScreen('screen-title');
+})();
+
+// ============================================================
+// ELEMENTAL ENERGY SYSTEM
+// Four 100-point bars (Air/Earth/Fire/Water) drawn on canvas edges.
+// Each spell costs energy from its element. Bars replenish over time.
+// ============================================================
+(function() {
+
+  // ── Config ─────────────────────────────────────────────────
+  var MAX_ENERGY   = 100;
+  var REGEN_RATE   = 9;    // points per second per element
+  var REGEN_TICK   = 80;   // ms between regen ticks
+
+  // Cost by spell type
+  var TYPE_COST = {
+    damage:  45,
+    hex:     52,
+    cc:      52,
+    shield:  30,
+    heal:    35,
+    enchant: 40,
+  };
+
+  // Colours matching CSS vars
+  var EL_META = {
+    air:   { color: '#7ecfff', glow: 'rgba(126,207,255,.7)', edge: 'top'   },
+    earth: { color: '#c4952a', glow: 'rgba(196,149,42,.7)',  edge: 'bot'   },
+    fire:  { color: '#ff6030', glow: 'rgba(255,96,48,.7)',   edge: 'right' },
+    water: { color: '#30b4d8', glow: 'rgba(48,180,216,.7)',  edge: 'left'  },
+  };
+
+  // ── State ───────────────────────────────────────────────────
+  var ENERGY = { air: MAX_ENERGY, earth: MAX_ENERGY, fire: MAX_ENERGY, water: MAX_ENERGY };
+  var regenTimer = null;
+  var rafId = null;
+
+  // ── CSS injection ───────────────────────────────────────────
+  var style = document.createElement('style');
+  style.textContent = [
+    /* Energy bar container positioned absolutely over canvas edge */
+    '.el-energy-bar{position:absolute;pointer-events:none;z-index:15;transition:none;}',
+
+    /* Horizontal bars (top/bot) */
+    '.el-energy-bar.top  {top:0;left:0;right:0;height:4px;}',
+    '.el-energy-bar.bot  {bottom:0;left:0;right:0;height:4px;}',
+
+    /* Vertical bars (right/left) */
+    '.el-energy-bar.right{top:0;bottom:0;right:0;width:4px;}',
+    '.el-energy-bar.left {top:0;bottom:0;left:0;width:4px;}',
+
+    /* Track (background) */
+    '.el-energy-track{position:absolute;inset:0;background:rgba(255,255,255,.06);border-radius:2px;}',
+
+    /* Fill */
+    '.el-energy-fill{position:absolute;border-radius:2px;transition:none;}',
+    '.el-energy-fill.top,.el-energy-fill.bot{top:0;bottom:0;left:0;}',
+    '.el-energy-fill.right,.el-energy-fill.left{left:0;right:0;top:0;}',
+
+    /* Percentage label — tiny, centered on bar */
+    '.el-energy-pct{position:absolute;font-family:"Cinzel",serif;font-size:.48rem;letter-spacing:.04em;pointer-events:none;white-space:nowrap;opacity:.75;transition:color .2s;}',
+    '.el-energy-pct.top  {top:6px;left:50%;transform:translateX(-50%);}',
+    '.el-energy-pct.bot  {bottom:6px;left:50%;transform:translateX(-50%);}',
+    '.el-energy-pct.right{right:6px;top:50%;transform:translateY(-50%) rotate(90deg);}',
+    '.el-energy-pct.left {left:6px;top:50%;transform:translateY(-50%) rotate(-90deg);}',
+
+    /* Flash when energy is consumed */
+    '@keyframes elDrain{0%{opacity:1;}100%{opacity:0;}}',
+    '.el-drain-flash{position:absolute;inset:0;border-radius:2px;animation:elDrain .45s ease-out forwards;pointer-events:none;z-index:2;}',
+
+    /* "OUT OF ENERGY" message — pops near the edge */
+    '.el-oom-msg{position:absolute;font-family:"Cinzel",serif;font-size:.6rem;letter-spacing:.06em;padding:2px 8px;border:1px solid;border-radius:2px;pointer-events:none;z-index:20;animation:oomFade .9s ease-out forwards;white-space:nowrap;}',
+    '@keyframes oomFade{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-22px);}}',
+
+    /* Low energy rune crack on edge */
+    '.el-energy-fill.low{opacity:.55;}',
+  ].join('');
+  document.head.appendChild(style);
+
+  // ── DOM injection into battle canvas ────────────────────────
+  var bars = {}; // el -> { wrap, fill, pct }
+
+  function injectBars() {
+    var inner = document.getElementById('cf-inner');
+    if (!inner || inner.dataset.energyInited) return;
+    inner.dataset.energyInited = '1';
+
+    ['air','earth','fire','water'].forEach(function(el) {
+      var meta = EL_META[el];
+      var edge = meta.edge;
+
+      var wrap = document.createElement('div');
+      wrap.className = 'el-energy-bar ' + edge;
+      wrap.id = 'el-ebar-' + el;
+
+      var track = document.createElement('div');
+      track.className = 'el-energy-track';
+
+      var fill = document.createElement('div');
+      fill.className = 'el-energy-fill ' + edge;
+      fill.id = 'el-efill-' + el;
+      fill.style.background = meta.color;
+      fill.style.boxShadow   = '0 0 6px ' + meta.glow;
+
+      var pct = document.createElement('div');
+      pct.className = 'el-energy-pct ' + edge;
+      pct.id = 'el-epct-' + el;
+      pct.style.color = meta.color;
+
+      wrap.appendChild(track);
+      wrap.appendChild(fill);
+      wrap.appendChild(pct);
+      inner.appendChild(wrap);
+
+      bars[el] = { wrap: wrap, fill: fill, pct: pct, edge: edge };
+    });
+  }
+
+  // ── Render bars ─────────────────────────────────────────────
+  function renderBars() {
+    var inner = document.getElementById('cf-inner');
+    if (!inner) return;
+    var W = inner.offsetWidth;
+    var H = inner.offsetHeight;
+
+    ['air','earth','fire','water'].forEach(function(el) {
+      var b = bars[el];
+      if (!b) return;
+      var val     = Math.max(0, Math.min(MAX_ENERGY, ENERGY[el]));
+      var pctF    = val / MAX_ENERGY;
+      var isLow   = val < 35;
+
+      if (b.edge === 'top' || b.edge === 'bot') {
+        b.fill.style.width  = (pctF * 100) + '%';
+        b.fill.style.height = '';
+      } else {
+        b.fill.style.height = (pctF * 100) + '%';
+        b.fill.style.width  = '';
+        if (b.edge === 'right' || b.edge === 'left') {
+          b.fill.style.top    = 'auto';
+          b.fill.style.bottom = '0';
+        }
+      }
+
+      b.fill.classList.toggle('low', isLow);
+      b.pct.textContent = Math.floor(val) + '';
+      b.pct.style.opacity = val < MAX_ENERGY ? '0.75' : '0.3';
+      b.pct.style.color   = EL_META[el].color;
+    });
+  }
+
+  // ── Drain flash animation ───────────────────────────────────
+  function flashDrain(el) {
+    var b = bars[el];
+    if (!b) return;
+    var prev = b.wrap.querySelector('.el-drain-flash');
+    if (prev) prev.remove();
+    var f = document.createElement('div');
+    f.className = 'el-drain-flash';
+    f.style.background = 'rgba(255,255,255,.35)';
+    b.wrap.appendChild(f);
+    setTimeout(function() { if (f.parentNode) f.remove(); }, 500);
+  }
+
+  // ── Energy depleted SFX ─────────────────────────────────────
+  // Hollow dry thud + descending whine — "empty tank" feel
+  function sfxDepleted(el) {
+    var actx = window.AudioContext || window.webkitAudioContext;
+    if (!actx) return;
+    var ctx2 = null;
+    try { ctx2 = new actx(); } catch(e) { return; }
+    if (!ctx2) return;
+
+    var t = ctx2.currentTime + 0.02;
+    var master = ctx2.createGain();
+    master.gain.value = 0.55;
+    master.connect(ctx2.destination);
+
+    // Hollow thud — low sine punch, "empty slot click"
+    var thud = ctx2.createOscillator();
+    var tg   = ctx2.createGain();
+    thud.type = 'sine';
+    thud.frequency.setValueAtTime(140, t);
+    thud.frequency.exponentialRampToValueAtTime(55, t + 0.10);
+    tg.gain.setValueAtTime(0.0, t);
+    tg.gain.linearRampToValueAtTime(0.5, t + 0.01);
+    tg.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    thud.connect(tg); tg.connect(master);
+    thud.start(t); thud.stop(t + 0.25);
+
+    // Short noise crack transient
+    var len = Math.ceil(ctx2.sampleRate * 0.04);
+    var buf = ctx2.createBuffer(1, len, ctx2.sampleRate);
+    var d   = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    var noise = ctx2.createBufferSource(); noise.buffer = buf;
+    var ng = ctx2.createGain(); ng.gain.value = 0.28;
+    var flt = ctx2.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 2200; flt.Q.value = 1.2;
+    noise.connect(flt); flt.connect(ng); ng.connect(master);
+    noise.start(t);
+
+    // Descending whine — element-tinted pitch
+    var baseHz = { air: 900, earth: 260, fire: 500, water: 640 }[el] || 400;
+    var whine  = ctx2.createOscillator();
+    var wg     = ctx2.createGain();
+    whine.type = 'triangle';
+    whine.frequency.setValueAtTime(baseHz, t + 0.03);
+    whine.frequency.exponentialRampToValueAtTime(baseHz * 0.38, t + 0.28);
+    wg.gain.setValueAtTime(0.0, t + 0.03);
+    wg.gain.linearRampToValueAtTime(0.18, t + 0.06);
+    wg.gain.exponentialRampToValueAtTime(0.001, t + 0.30);
+    whine.connect(wg); wg.connect(master);
+    whine.start(t + 0.03); whine.stop(t + 0.32);
+
+    // Auto-close context after sound finishes to avoid leaking
+    setTimeout(function() { try { ctx2.close(); } catch(e){} }, 800);
+  }
+
+  // ── OOM popup ───────────────────────────────────────────────
+  function showOOM(el) {
+    var inner = document.getElementById('cf-inner');
+    if (!inner) return;
+    var meta = EL_META[el];
+    var edge = meta.edge;
+    var msg = document.createElement('div');
+    msg.className = 'el-oom-msg';
+    msg.textContent = el.toUpperCase() + ' ENERGY LOW!';
+    msg.style.color       = meta.color;
+    msg.style.borderColor = meta.color;
+    msg.style.background  = 'rgba(8,9,15,.92)';
+    msg.style.boxShadow   = '0 0 8px ' + meta.glow;
+
+    // Position near the edge
+    var iW = inner.offsetWidth, iH = inner.offsetHeight;
+    if (edge === 'top')   { msg.style.top = '12px'; msg.style.left = '50%'; msg.style.transform = 'translateX(-50%)'; }
+    if (edge === 'bot')   { msg.style.bottom = '12px'; msg.style.left = '50%'; msg.style.transform = 'translateX(-50%)'; }
+    if (edge === 'right') { msg.style.right = '8px'; msg.style.top = '50%'; msg.style.transform = 'translateY(-50%)'; }
+    if (edge === 'left')  { msg.style.left = '8px';  msg.style.top = '50%'; msg.style.transform = 'translateY(-50%)'; }
+
+    inner.appendChild(msg);
+    setTimeout(function() { if (msg.parentNode) msg.remove(); }, 1000);
+  }
+
+  // ── Regen loop ───────────────────────────────────────────────
+  function startRegen() {
+    if (regenTimer) return;
+    var perTick = REGEN_RATE * (REGEN_TICK / 1000);
+    regenTimer = setInterval(function() {
+      var anyBattle = document.getElementById('screen-battle');
+      if (!anyBattle || !anyBattle.classList.contains('active')) return;
+      var changed = false;
+      ['air','earth','fire','water'].forEach(function(el) {
+        if (ENERGY[el] < MAX_ENERGY) {
+          ENERGY[el] = Math.min(MAX_ENERGY, ENERGY[el] + perTick);
+          changed = true;
+        }
+      });
+      if (changed) renderBars();
+    }, REGEN_TICK);
+  }
+
+  function stopRegen() {
+    clearInterval(regenTimer);
+    regenTimer = null;
+  }
+
+  // ── Reset on battle start ────────────────────────────────────
+  function resetEnergy() {
+    ENERGY.air = ENERGY.earth = ENERGY.fire = ENERGY.water = MAX_ENERGY;
+  }
+
+  // ── Hook into resolvePlayerSpell ─────────────────────────────
+  var _origResolve = resolvePlayerSpell;
+  resolvePlayerSpell = function(id, score, t) {
+    if (typeof SPELLS === 'undefined' || !SPELLS[id]) {
+      return _origResolve.apply(this, arguments);
+    }
+    var sp   = SPELLS[id];
+    var el   = sp.el;
+    var type = sp.type;
+    var cost = TYPE_COST[type] || 35;
+
+    // Miscast already fizzles — no energy cost
+    if (t && t.m === 0) {
+      return _origResolve.apply(this, arguments);
+    }
+
+    if (ENERGY[el] < cost) {
+      // Not enough energy — block the cast, drain remaining energy as penalty
+      sfxDepleted(el);
+      showOOM(el);
+      var inner = document.getElementById('cf-inner');
+      if (inner) {
+        inner.style.transition = 'box-shadow .15s';
+        inner.style.boxShadow  = '0 0 0 2px ' + EL_META[el].color;
+        setTimeout(function() { inner.style.boxShadow = ''; inner.style.transition = ''; }, 250);
+      }
+      setLog('✦ ' + (el.charAt(0).toUpperCase()+el.slice(1)) + ' energy depleted! (' + Math.floor(ENERGY[el]) + '/' + cost + ')', EL_META[el].color, 'player');
+      // Penalty: drain to 10, or lower if already below 10
+      ENERGY[el] = Math.min(ENERGY[el], 10);
+      flashDrain(el);
+      renderBars();
+      return; // block the spell
+    }
+
+    // Normal deduct
+    ENERGY[el] = Math.max(0, ENERGY[el] - cost);
+    flashDrain(el);
+    renderBars();
+
+    return _origResolve.apply(this, arguments);
+  };
+
+  // ── Hook into battle start / end ────────────────────────────
+  var _origShowScreen = showScreen;
+  showScreen = function(id) {
+    _origShowScreen.apply(this, arguments);
+    if (id === 'screen-battle') {
+      resetEnergy();
+      // Slight delay to let cf-inner render
+      setTimeout(function() {
+        injectBars();
+        renderBars();
+        startRegen();
+      }, 120);
+    } else {
+      stopRegen();
+    }
+  };
+
+  // ── Also re-render on battle win/lose so bars stay visible ──
+  var _origBattleWin2 = battleWin;
+  battleWin = function() {
+    stopRegen();
+    _origBattleWin2.apply(this, arguments);
+  };
+  var _origBattleLose2 = battleLose;
+  battleLose = function() {
+    stopRegen();
+    _origBattleLose2.apply(this, arguments);
+  };
+
 })();
 </script>
 </body>
