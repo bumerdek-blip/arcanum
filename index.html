@@ -202,9 +202,11 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
 /* BATTLE */
 #screen-battle{padding:0;align-items:stretch;justify-content:stretch;overflow:hidden;height:100dvh;max-height:100dvh;}
 .battle-layout{display:flex;flex-direction:column;width:100%;height:100dvh;max-height:100dvh;max-width:520px;margin:0 auto;padding:7px 7px 4px;gap:4px;overflow:hidden;}
-.combatant{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);padding:5px 8px;flex-shrink:0;}
+.battle-layout>.avatar-wrap{flex:0 0 55%;max-height:55%;}
+.battle-layout>.cf-wrap{flex:0 0 calc(45% - 4px);max-height:calc(45% - 4px);}
+.combatant{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);padding:5px 8px;flex-shrink:0;height:64px;min-height:64px;max-height:64px;overflow:hidden;}
 .c-icon{font-size:1.55rem;flex-shrink:0;}
-.c-info{flex:1;min-width:0;}
+.c-info{flex:1;min-width:0;overflow:hidden;}
 .c-name{font-family:'Cinzel',serif;font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hp-wrap{height:6px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:3px;overflow:hidden;}
 .hp-bar{height:100%;border-radius:2px;transition:width .4s;}
@@ -219,17 +221,27 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
 .cast-fill.air{background:linear-gradient(90deg,#002060,#0060c0,var(--air));box-shadow:0 0 8px rgba(126,207,255,.6);}
 .cast-fill.earth{background:linear-gradient(90deg,#1a0e00,#8a5a00,var(--earth));box-shadow:0 0 8px rgba(196,149,42,.6);}
 .cast-fill.water{background:linear-gradient(90deg,#001825,#005060,var(--water));box-shadow:0 0 8px rgba(48,180,216,.6);}
-.e-intent{font-size:.62rem;margin-top:2px;font-weight:bold;letter-spacing:.01em;padding:1px 3px;border-radius:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.e-intent{font-size:.62rem;margin-top:2px;font-weight:bold;letter-spacing:.01em;padding:1px 3px;border-radius:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:16px;line-height:14px;}
 .e-intent.fire {color:#ff9070;background:rgba(255,96,48,.12);border-left:2px solid var(--fire);}
 .e-intent.air  {color:#a0dfff;background:rgba(126,207,255,.12);border-left:2px solid var(--air);}
 .e-intent.earth{color:#e0b060;background:rgba(196,149,42,.12);border-left:2px solid var(--earth);}
 .e-intent.water{color:#60d0f0;background:rgba(48,180,216,.12);border-left:2px solid var(--water);}
-.status-icons{display:flex;gap:2px;flex-wrap:wrap;margin-top:1px;}
-.sicon{font-size:.68rem;padding:0 2px;background:rgba(255,255,255,.06);border-radius:2px;}
-.battle-log{background:var(--bg2);border:1px solid var(--border);padding:5px 8px;font-size:.73rem;color:var(--text2);font-style:italic;min-height:28px;display:flex;align-items:center;flex-shrink:0;}
-/* Chain reaction notification strip */
+.status-icons{display:flex;gap:2px;flex-wrap:nowrap;overflow:hidden;height:16px;min-height:16px;max-height:16px;align-items:center;}
+.sicon{font-size:.63rem;padding:0 2px;background:rgba(255,255,255,.06);border-radius:2px;white-space:nowrap;flex-shrink:0;}
+/* Player HUD overlay at bottom of canvas */
+.player-hud{position:absolute;bottom:0;left:0;right:0;z-index:20;pointer-events:none;padding:6px 10px 8px;background:linear-gradient(transparent,rgba(8,9,15,.72) 35%,rgba(8,9,15,.88));backdrop-filter:blur(1px);}
+.player-hud-inner{display:flex;align-items:center;gap:8px;}
+/* Floating battle log */
+#battle-log-float{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:30;overflow:hidden;}
+.blog-msg{position:absolute;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:.72rem;font-style:italic;text-align:center;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis;padding:3px 10px;background:rgba(8,9,15,.82);border:1px solid rgba(255,255,255,.1);border-radius:3px;pointer-events:none;animation:blogFade 2s ease-out forwards;}
+@keyframes blogFade{0%{opacity:1;transform:translateX(-50%) translateY(0);}70%{opacity:.9;transform:translateX(-50%) translateY(-14px);}100%{opacity:0;transform:translateX(-50%) translateY(-26px);}}
+/* Enemy log container centers messages */
+#enemy-log-float .blog-msg{position:relative;left:auto;transform:none;margin:2px auto;animation:blogFadeCenter 2s ease-out forwards;}
+@keyframes blogFadeCenter{0%{opacity:1;transform:translateY(0);}70%{opacity:.9;transform:translateY(-10px);}100%{opacity:0;transform:translateY(-20px);}}
+/* chain-banner now inside cf-inner */
 .chain-banner{background:linear-gradient(135deg,rgba(42,18,80,.95),rgba(80,18,42,.95));border:1px solid rgba(192,128,255,.6);padding:3px 8px;font-family:'Cinzel',serif;font-size:.7rem;color:#d0a0ff;text-align:center;letter-spacing:.04em;position:absolute;left:0;right:0;top:0;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;}
 .chain-banner.show{opacity:1;}
+/* chain-banner styles moved to player-hud section */
 .cf-wrap{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
 .cf-lbl{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.09em;color:var(--text3);text-align:center;padding:2px 0;flex-shrink:0;}
 .cf-inner{position:relative;flex:1;min-height:0;overflow:hidden;border:1px solid var(--border);background:rgba(8,9,15,.85);transition:border-color .12s;}
@@ -321,9 +333,9 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
 @keyframes cdNumPop{0%{transform:scale(2.5);opacity:0;}30%{opacity:1;}80%{transform:scale(1);opacity:1;}100%{transform:scale(.8);opacity:0;}}
 
 /* BIG AVATAR */
-.avatar-wrap{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;padding:10px 0 6px;flex-shrink:0;background:var(--panel);border:1px solid var(--border);}
-.avatar-body{position:relative;width:90px;height:90px;display:flex;align-items:center;justify-content:center;}
-.avatar-figure{font-size:4.2rem;line-height:1;transition:filter .2s,transform .2s;display:block;text-align:center;filter:drop-shadow(0 0 12px rgba(212,168,83,.3));}
+.avatar-wrap{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;padding:0;flex-shrink:0;background:var(--panel);border:1px solid var(--border);overflow:hidden;}
+.avatar-body{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.avatar-figure{font-size:5.5rem;line-height:1;transition:filter .2s,transform .2s;display:block;text-align:center;filter:drop-shadow(0 0 16px rgba(212,168,83,.35));}
 /* Avatar status ring */
 .avatar-ring{position:absolute;inset:-6px;border-radius:50%;border:3px solid transparent;transition:border-color .25s,box-shadow .25s;pointer-events:none;}
 .avatar-ring.normal {border-color:rgba(212,168,83,.25);}
@@ -347,7 +359,7 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
 .avatar-star{position:absolute;font-size:1rem;animation:avatarStar 1.2s ease-in-out infinite;}
 @keyframes avatarStar{0%,100%{transform:rotate(0deg) translateY(0);}50%{transform:rotate(180deg) translateY(-6px);}}
 /* Avatar status label */
-.avatar-status-lbl{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.07em;margin-top:2px;height:14px;text-align:center;transition:opacity .2s,color .2s;}
+.avatar-status-lbl{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.07em;height:0;overflow:visible;text-align:center;transition:opacity .2s,color .2s;position:relative;z-index:5;margin-top:-14px;pointer-events:none;}
 .avatar-status-lbl.normal{color:var(--text3);opacity:.5;}
 .avatar-status-lbl.stunned{color:var(--air);opacity:1;}
 .avatar-status-lbl.interrupted{color:var(--air);opacity:.9;}
@@ -355,14 +367,70 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
 .avatar-status-lbl.healing{color:var(--water);opacity:1;}
 .avatar-status-lbl.hexed{color:var(--hex);opacity:1;}
 .avatar-status-lbl.debuffed{color:#ff9040;opacity:1;}
-/* Avatar hp row */
-.avatar-hp-row{width:100%;padding:0 10px;margin-top:2px;}
+/* Avatar hp row (legacy, hidden) */
+.avatar-hp-row{display:none;}
+/* Enemy HUD overlays */
+.enemy-hud-top{position:absolute;top:0;left:0;right:0;z-index:20;pointer-events:none;display:flex;align-items:center;gap:8px;padding:6px 10px 8px;background:linear-gradient(rgba(8,9,15,.85) 40%,transparent);}
+.enemy-hud-name{font-family:'Cinzel',serif;font-size:.76rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.enemy-hud-bot{position:absolute;bottom:0;left:0;right:0;z-index:20;pointer-events:none;padding:8px 10px 6px;background:linear-gradient(transparent,rgba(8,9,15,.75) 35%,rgba(8,9,15,.9));}
 /* Hit shake on avatar */
 @keyframes avatarHit{0%{transform:translateX(0);}20%{transform:translateX(-7px);}40%{transform:translateX(7px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}100%{transform:translateX(0);}}
 .avatar-hit{animation:avatarHit .35s ease-out;}
 /* Spawn pop animation for avatar */
 @keyframes avatarSpawn{0%{transform:scale(0) rotate(-30deg);opacity:0;}60%{transform:scale(1.15) rotate(5deg);opacity:1;}100%{transform:scale(1) rotate(0deg);opacity:1;}}
 .avatar-spawn{animation:avatarSpawn .5s cubic-bezier(.22,1.4,.5,1) forwards;}
+
+/* ── SPLASH AVATAR (creature art panel) ── */
+.avatar-wrap.splash-mode #avatar-body{display:none;}
+.avatar-wrap.splash-mode .avatar-ring{display:none;}
+.avatar-wrap.splash-mode .avatar-ring{inset:0;border-radius:0;border-width:0 0 2px 0;}
+.splash-scene{
+  position:absolute;inset:0;width:100%;height:100%;overflow:hidden;
+  background:#050a02;
+}
+.splash-bg{position:absolute;inset:0;transition:background .5s;}
+.splash-beam{position:absolute;top:-10%;left:50%;transform:translateX(-50%);width:140%;height:130%;clip-path:polygon(25% 0%,75% 0%,100% 100%,0% 100%);filter:blur(28px);pointer-events:none;transition:background .5s;}
+.splash-spores{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.splash-spore{position:absolute;border-radius:50%;animation:sporeFloat linear infinite;filter:blur(.5px);}
+@keyframes sporeFloat{0%{transform:translateY(100%) translateX(0) scale(1);opacity:0}10%{opacity:1}90%{opacity:.8}100%{transform:translateY(-15px) translateX(var(--sdx)) scale(.2);opacity:0}}
+.splash-creature{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:55%;height:100%;pointer-events:none;transition:filter .4s;
+}
+.splash-creature svg{width:100%;height:100%;display:block;}
+.splash-glow{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:50%;height:35px;filter:blur(16px);pointer-events:none;transition:background .5s;}
+/* Universal state indicator overlays */
+.splash-stun-stars{position:absolute;top:6%;left:50%;transform:translateX(-50%);display:flex;gap:5px;opacity:0;transition:opacity .3s;pointer-events:none;}
+.splash-stun-stars.show{opacity:1;}
+.splash-ss{font-size:.8rem;color:#7ecfff;filter:drop-shadow(0 0 4px #7ecfff);animation:splashStarBob 1.1s ease-in-out infinite;}
+.splash-ss:nth-child(2){animation-delay:.25s;}.splash-ss:nth-child(3){animation-delay:.5s;}
+@keyframes splashStarBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px) scale(1.2)}}
+.splash-interrupt-ring{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:44px;height:44px;border-radius:50%;border:2px solid #7ecfff;box-shadow:0 0 12px rgba(126,207,255,.6);opacity:0;transition:opacity .3s;pointer-events:none;}
+.splash-interrupt-ring.show{opacity:1;animation:splashIRing .4s ease-in-out infinite;}
+@keyframes splashIRing{0%,100%{transform:translateX(-50%) scale(1);opacity:.6}50%{transform:translateX(-50%) scale(1.18);opacity:1}}
+.splash-heal-ring{position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .4s;}
+.splash-heal-ring.show{opacity:1;}
+.shr{position:absolute;left:50%;top:55%;border-radius:50%;border:1.5px solid rgba(48,180,216,.7);animation:shrExpand 2s ease-out infinite;transform:translate(-50%,-50%);opacity:0;}
+.shr:nth-child(1){width:35px;height:35px;animation-delay:0s;}.shr:nth-child(2){width:55px;height:55px;animation-delay:.6s;}.shr:nth-child(3){width:75px;height:75px;animation-delay:1.2s;}
+@keyframes shrExpand{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+.splash-hex-par{position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .3s;}
+.splash-hex-par.show{opacity:1;}
+.shp{position:absolute;border-radius:50%;animation:shpFloat linear infinite;}
+@keyframes shpFloat{0%{opacity:.9;transform:translateY(0)}100%{opacity:0;transform:translateY(-55px)}}
+.splash-debuff-par{position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .3s;}
+.splash-debuff-par.show{opacity:1;}
+.sdp{position:absolute;border-radius:1px;animation:sdpFall linear infinite;}
+@keyframes sdpFall{0%{opacity:.8;transform:translateY(-8px)}100%{opacity:0;transform:translateY(75px)}}
+.splash-death-ov{position:absolute;inset:0;opacity:0;transition:opacity .6s;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.3) 0%,rgba(0,0,0,.75) 100%);pointer-events:none;}
+.splash-death-ov.show{opacity:1;}
+/* Creature animation states */
+@keyframes scBreath{0%,100%{transform:translateX(-50%) scaleY(1)}50%{transform:translateX(-50%) scaleY(1.018)}}
+@keyframes scSway{0%,100%{transform:translateX(-50%) rotate(-2deg)}50%{transform:translateX(-50%) rotate(2deg)}}
+@keyframes scBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+@keyframes scShiver{0%,100%{transform:translateX(-50%) rotate(0deg)}30%{transform:translateX(-50%) rotate(-.7deg)}70%{transform:translateX(-50%) rotate(.7deg)}}
+@keyframes scSag{0%,100%{transform:translateX(-50%) scaleY(1)}50%{transform:translateX(-50%) scaleY(.975) translateY(1.5px)}}
+@keyframes scCharge{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.02)}}
+@keyframes scShake{0%,100%{transform:translateX(calc(-50% + 1px))}50%{transform:translateX(calc(-50% - 1px))}}
 
 /* SVG Icon sizing - geometric sigil icons */
 .hcard-icon svg,.sp-card-icon svg,.shop-icon svg,.c-icon svg,
@@ -640,17 +708,7 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
   <div class="battle-layout">
     <!-- BIG AVATAR ENEMY PANEL -->
     <div class="avatar-wrap" id="avatar-wrap">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;padding:0 10px 4px;">
-        <div style="font-family:'Cinzel',serif;font-size:.74rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="e-name">Enemy</div>
-        <div class="status-icons" id="e-status"></div>
-      </div>
-      <div class="avatar-hp-row">
-        <div class="hp-wrap"><div class="hp-bar hp-e" id="e-hp" style="width:100%"></div></div>
-        <div class="hp-txt" id="e-hp-txt">100/100</div>
-        <div class="cast-bar-wrap"><div class="cast-fill" id="e-cast" style="width:0%"></div></div>
-        <div class="e-intent" id="e-intent"></div>
-      </div>
-      <div class="avatar-body">
+      <div class="avatar-body" id="avatar-body">
         <div class="avatar-ring normal" id="avatar-ring"></div>
         <div class="avatar-figure" id="e-icon"></div>
         <div class="avatar-stars" id="avatar-stars">
@@ -661,35 +719,66 @@ h1,h2,h3{font-family:'Cinzel',serif;letter-spacing:.05em;}
           <span class="avatar-star" style="left:70%;top:65%;animation-delay:.15s">★</span>
         </div>
       </div>
+      <!-- Splash creature art panel — shown instead of avatar-body when splash active -->
+      <div class="splash-scene" id="splash-scene" style="display:none">
+        <div class="splash-bg" id="splash-bg"></div>
+        <div class="splash-beam" id="splash-beam"></div>
+        <div class="splash-spores" id="splash-spores"></div>
+        <div class="splash-stun-stars" id="splash-stun-stars"><span class="splash-ss">✦</span><span class="splash-ss">★</span><span class="splash-ss">✦</span></div>
+        <div class="splash-interrupt-ring" id="splash-interrupt-ring"></div>
+        <div class="splash-heal-ring" id="splash-heal-ring"><div class="shr"></div><div class="shr"></div><div class="shr"></div></div>
+        <div class="splash-hex-par" id="splash-hex-par"></div>
+        <div class="splash-debuff-par" id="splash-debuff-par"></div>
+        <div class="splash-death-ov" id="splash-death-ov"></div>
+        <div class="splash-glow" id="splash-glow"></div>
+        <div class="splash-creature" id="splash-creature"></div>
+      </div>
       <div class="avatar-status-lbl normal" id="avatar-status-lbl">READY</div>
-    </div>
-    <div style="position:relative;flex-shrink:0;">
-      <div class="battle-log" id="battle-log">Battle begins!</div>
-      <div class="chain-banner" id="chain-banner"></div>
-    </div>
-    <div class="combatant">
-      <div class="c-icon" id="p-icon"></div>
-      <div class="c-info">
-        <div class="c-name">You</div>
-        <div class="hp-wrap"><div class="hp-bar hp-p" id="p-hp" style="width:100%"></div></div>
-        <div class="hp-txt" id="p-hp-txt">100/100</div>
-        <div class="sh-wrap"><div class="sh-bar" id="p-sh" style="width:0%"></div></div>
-        <div class="status-icons" id="p-status"></div>
+      <!-- Floating log for enemy -->
+      <div id="enemy-log-float" style="position:absolute;inset:0;pointer-events:none;z-index:25;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;"></div>
+      <!-- Enemy HUD overlay: name/status top, hp/cast/intent bottom -->
+      <div class="enemy-hud-top">
+        <div class="enemy-hud-name" id="e-name">Enemy</div>
+        <div class="status-icons" id="e-status"></div>
+      </div>
+      <div class="enemy-hud-bot">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:3px;">
+          <span id="e-hp-txt" style="font-size:.6rem;color:rgba(200,212,240,.6);white-space:nowrap;">100/100</span>
+          <div class="e-intent" id="e-intent" style="height:auto;line-height:1.2;flex:1;text-align:right;margin-top:0;"></div>
+        </div>
+        <div class="hp-wrap" style="margin-top:0;height:8px;"><div class="hp-bar hp-e" id="e-hp" style="width:100%"></div></div>
+        <div class="cast-bar-wrap" style="margin-top:3px;"><div class="cast-fill" id="e-cast" style="width:0%"></div></div>
       </div>
     </div>
     <div class="cf-wrap">
-      <div class="cf-lbl">CAST FIELD — DRAW TO CAST</div>
       <div class="cf-inner" id="cf-inner">
         <div class="edge-lbl top"   id="el-top">  <span class="ei" id="el-top-ic"></span>  <span>AIR</span></div>
         <div class="edge-lbl bot"   id="el-bot">  <span class="ei" id="el-bot-ic"></span>  <span>EARTH</span></div>
         <div class="edge-lbl right" id="el-right"><span class="ei" id="el-right-ic"></span><span>FIRE</span></div>
         <div class="edge-lbl left"  id="el-left"> <span class="ei" id="el-left-ic"></span> <span>WATER</span></div>
         <canvas id="battle-canvas"></canvas>
+        <div id="battle-log-float"></div>
+        <div class="chain-banner" id="chain-banner"></div>
         <div class="det-label" id="det-label"></div>
         <div class="stun-overlay" id="stun-overlay"></div>
         <div class="effect-overlay" id="effect-overlay"></div>
+        <div class="player-hud" id="player-hud">
+          <div class="player-hud-inner">
+            <div class="c-icon" id="p-icon" style="font-size:1.1rem;flex-shrink:0;line-height:1;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="font-family:'Cinzel',serif;font-size:.62rem;color:rgba(200,212,240,.7);white-space:nowrap;">You</span>
+                <span id="p-hp-txt" style="font-size:.6rem;color:rgba(200,212,240,.55);white-space:nowrap;">100/100</span>
+                <div class="status-icons" id="p-status" style="margin-left:auto;height:14px;"></div>
+              </div>
+              <div class="hp-wrap" style="margin-top:0;"><div class="hp-bar hp-p" id="p-hp" style="width:100%"></div></div>
+              <div class="sh-wrap" style="margin-top:2px;"><div class="sh-bar" id="p-sh" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div id="battle-log" style="display:none"></div>
       </div>
-      <div class="cf-hint" id="cf-hint">top=Air  bottom=Earth  right=Fire  left=Water</div>
+      <div class="cf-hint" id="cf-hint">top=Air  bot=Earth  right=Fire  left=Water</div>
     </div>
   </div>
 </div>
@@ -1578,7 +1667,7 @@ var SHOP = [
 // 6 generic enemies (randomly assigned 3 per stage)
 var FOREST_ENEMIES = [
   {id:'sprite',    n:'Forest Sprite',    icKey:'sprite',    atkEl:'air',   baseHp:55,  baseAtk:11, baseT:4200, gold:[7,13],  ess:{el:'air',ch:.35}},
-  {id:'thornling', n:'Thornling',        icKey:'thornling', atkEl:'earth', baseHp:70,  baseAtk:14, baseT:4000, gold:[9,15],  ess:{el:'earth',ch:.3}},
+  {id:'thornling', n:'Thornling',        icKey:'thornling', atkEl:'earth', atkEls:['fire','earth','earth-atk','water'], baseHp:70,  baseAtk:14, baseT:4000, gold:[9,15],  ess:{el:'earth',ch:.3}},
   {id:'mossbear',  n:'Moss Bear',        icKey:'mossbear',  atkEl:'earth', baseHp:90,  baseAtk:16, baseT:3700, gold:[11,18], ess:{el:'earth',ch:.35}},
   {id:'willowisp', n:'Will-o-Wisp',      icKey:'willowisp', atkEl:'air',   baseHp:60,  baseAtk:13, baseT:3800, gold:[10,16], ess:{el:'air',ch:.4}},
   {id:'venomfang', n:'Venom Fang',       icKey:'venomfang', atkEl:'water', baseHp:75,  baseAtk:17, baseT:3500, gold:[12,19], ess:{el:'water',ch:.3}},
@@ -1655,6 +1744,7 @@ function buildAdventurePath() {
       hp:   Math.round(base.baseHp  * hpMult),
       atk:  Math.round(base.baseAtk * atkMult),
       atkEl:base.atkEl,
+      atkEls:base.atkEls||null,
       atkT: Math.round(base.baseT   * tMult),
       gold: [Math.round(base.gold[0]*(1+prog*1.5)), Math.round(base.gold[1]*(1+prog*1.5))],
       ess:  base.ess
@@ -1704,6 +1794,7 @@ function buildAdventurePath() {
           hp:   Math.round(e.hp   * intraScale),
           atk:  Math.round(e.atk  * intraScale),
           atkEl:e.atkEl,
+          atkEls:e.atkEls||null,
           atkT: Math.round(e.atkT * (1 - b * 0.05)),
           gold: e.gold, ess: e.ess
         });
@@ -1754,6 +1845,7 @@ function buildAdventurePath() {
           hp:   Math.round(e2.hp   * intraScale2 * 1.30),
           atk:  Math.round(e2.atk  * intraScale2 * 1.25),
           atkEl:e2.atkEl,
+          atkEls:e2.atkEls||null,
           atkT: Math.round(e2.atkT * (1 - b2 * 0.05)),
           gold: [Math.round(e2.gold[0]*1.4), Math.round(e2.gold[1]*1.4)],
           ess: e2.ess
@@ -1980,21 +2072,23 @@ function triggerChain(chain, score) {
 
 // Chain reaction implementations
 function chainSteam(score){G.chainBonus={type:'dmgMult',mult:1.4,expires:Date.now()+4000};applyEnemyDebuff('atkReduce',0.8,3000);}
-function chainFreeze(score){if(!G.battleOver&&G.enemy){G.castGen++;G.eStunned=true;clearInterval(G.eCastInterval);document.getElementById('e-cast').style.width='0%';clearTimeout(G.eStunTimer);G.eStunTimer=setTimeout(function(){G.eStunned=false;if(G.enemy&&G.enemy.curHp>0&&!G.battleOver)startECast();},2000);setLog('Ice freeze! Enemy cast stopped 2s!','#a0f0ff');}}
-function chainDust(score){applyEnemyDebuff('atkReduce',0.5,3000);setLog('Dust Storm! Enemy -50% atk next cast!','#d0a060');}
-function chainMeteor(score){G.chainBonus={type:'dmgMult',mult:1.6,expires:Date.now()+5000};setLog('Meteor Drop! +60% next damage!','#ff8040');}
+function chainFreeze(score){if(!G.battleOver&&G.enemy){G.castGen++;G.eStunned=true;clearInterval(G.eCastInterval);document.getElementById('e-cast').style.width='0%';clearTimeout(G.eStunTimer);G.eStunTimer=setTimeout(function(){G.eStunned=false;if(G.enemy&&G.enemy.curHp>0&&!G.battleOver)startECast();},2000);setLog('Ice freeze! Enemy cast stopped 2s!','#a0f0ff','enemy');}}
+function chainDust(score){applyEnemyDebuff('atkReduce',0.5,3000);setLog('Dust Storm! Enemy -50% atk next cast!','#d0a060','enemy');}
+function chainMeteor(score){G.chainBonus={type:'dmgMult',mult:1.6,expires:Date.now()+5000};setLog('Meteor Drop! +60% next damage!','#ff8040','player');}
 function chainFirestorm(score){G.chainBonus={type:'dmgMult',mult:1.35,expires:Date.now()+4000};if(G.enemy&&G.enemy.curHp>0){G.castGen++;G.eStunned=true;clearInterval(G.eCastInterval);document.getElementById('e-cast').style.width='0%';clearTimeout(G.eStunTimer);G.eStunTimer=setTimeout(function(){G.eStunned=false;if(G.enemy&&G.enemy.curHp>0&&!G.battleOver)startECast();},800);}}
-function chainThermal(score){G.chainBonus={type:'dmgMult',mult:1.5,expires:Date.now()+5000,pierceArmor:true};setLog('Thermal Lance! +50% dmg, pierces armor!','#ffaa40');}
-function chainMud(score){applyEnemyDebuff('castSlow',0.6,4000);setLog('Mud Trap! Enemy cast -40% speed!','#a08040');}
-function chainCrystal(score){G.chainBonus={type:'shieldMult',mult:1.5,expires:Date.now()+5000};setLog('Crystal Form! +50% next shield!','#60d0d0');}
-function chainMaelstrom(score){G.chainBonus={type:'healMult',mult:1.35,expires:Date.now()+4000};setLog('Maelstrom! +35% next heal & shield!','#60b0ff');}
-function chainIceLance(score){if(G.enemy&&G.enemy.curHp>0){G.castGen++;G.eStunned=true;clearInterval(G.eCastInterval);document.getElementById('e-cast').style.width='0%';clearTimeout(G.eStunTimer);G.eStunTimer=setTimeout(function(){G.eStunned=false;if(G.enemy&&G.enemy.curHp>0&&!G.battleOver)startECast();},1200);var bdmg=25;G.enemy.curHp=Math.max(0,G.enemy.curHp-bdmg);setLog('Ice Lance! Interrupt + '+bdmg+' bonus damage!','#a0e8ff');spawnFx('#a0e8ff','enemy');dmgPop(bdmg,'#a0e8ff','enemy');refreshBUI();if(G.enemy.curHp<=0){clearInterval(G.eCastInterval);setTimeout(battleWin,800);}}}
-function chainMagma(score){G.chainBonus={type:'dmgMult',mult:1.8,expires:Date.now()+5000};G.hexStack.push({id:'magmaBurn',type:'dot',val:8,expires:Date.now()+5000});setLog('Magma Surge! +80% dmg & enemy Burns!','#ff4000');}
-function chainObsidian(score){G.chainBonus={type:'shieldMult',mult:1.6,expires:Date.now()+5000,reflect:0.1};setLog('Obsidian Ward! +60% shield, reflects 10%!','#806040');}
+function chainThermal(score){G.chainBonus={type:'dmgMult',mult:1.5,expires:Date.now()+5000,pierceArmor:true};setLog('Thermal Lance! +50% dmg, pierces armor!','#ffaa40','player');}
+function chainMud(score){applyEnemyDebuff('castSlow',0.6,4000);setLog('Mud Trap! Enemy cast -40% speed!','#a08040','enemy');}
+function chainCrystal(score){G.chainBonus={type:'shieldMult',mult:1.5,expires:Date.now()+5000};setLog('Crystal Form! +50% next shield!','#60d0d0','player');}
+function chainMaelstrom(score){G.chainBonus={type:'healMult',mult:1.35,expires:Date.now()+4000};setLog('Maelstrom! +35% next heal & shield!','#60b0ff','player');}
+function chainIceLance(score){if(G.enemy&&G.enemy.curHp>0){G.castGen++;G.eStunned=true;clearInterval(G.eCastInterval);document.getElementById('e-cast').style.width='0%';clearTimeout(G.eStunTimer);G.eStunTimer=setTimeout(function(){G.eStunned=false;if(G.enemy&&G.enemy.curHp>0&&!G.battleOver)startECast();},1200);var bdmg=25;G.enemy.curHp=Math.max(0,G.enemy.curHp-bdmg);setLog('Ice Lance! Interrupt + '+bdmg+' bonus damage!','#a0e8ff','enemy');spawnFx('#a0e8ff','enemy');dmgPop(bdmg,'#a0e8ff','enemy');refreshBUI();if(G.enemy.curHp<=0){clearInterval(G.eCastInterval);setTimeout(battleWin,800);}}}
+function chainMagma(score){G.chainBonus={type:'dmgMult',mult:1.8,expires:Date.now()+5000};G.hexStack.push({id:'magmaBurn',type:'dot',val:8,expires:Date.now()+5000});setLog('Magma Surge! +80% dmg & enemy Burns!','#ff4000','enemy');}
+function chainObsidian(score){G.chainBonus={type:'shieldMult',mult:1.6,expires:Date.now()+5000,reflect:0.1};setLog('Obsidian Ward! +60% shield, reflects 10%!','#806040','player');}
 
 function applyEnemyDebuff(type,mult,ms){
-  if(type==='castSlow'){clearTimeout(G.eSlowTimer);G.eSlowMult=mult;G.eSlowTimer=setTimeout(function(){G.eSlowMult=1;},ms);}
-  else if(type==='atkReduce'){G.enemy.atkDebuff=mult;setTimeout(function(){if(G.enemy)G.enemy.atkDebuff=1;},ms);}
+  if(type==='castSlow'){clearTimeout(G.eSlowTimer);G.eSlowMult=mult;
+    G.eSlowTimer=setTimeout(function(){G.eSlowMult=1;},ms);}
+  else if(type==='atkReduce'){G.enemy.atkDebuff=mult;
+    setTimeout(function(){if(G.enemy)G.enemy.atkDebuff=1;},ms);}
 }
 
 // Apply chain bonus to a value
@@ -3965,7 +4059,7 @@ var BC={cv:null,ctx:null,W:0,H:0,pts:[],drawing:false,el:null,mid:null,fadeT:nul
 function startBattle(idx){
   var bd=STAGES[G.curStage].battles[idx];
   var isBoss = STAGES[G.curStage].isBoss;
-  G.enemy={n:bd.n,icKey:bd.icKey,hp:bd.hp,curHp:bd.hp,atk:bd.atk,atkEl:bd.atkEl,atkT:bd.atkT,gold:bd.gold,ess:bd.ess,reward:bd.reward,armor:0,atkDebuff:1};
+  G.enemy={n:bd.n,icKey:bd.icKey,hp:bd.hp,curHp:bd.hp,atk:bd.atk,atkEl:bd.atkEl,atkEls:bd.atkEls||null,atkT:bd.atkT,gold:bd.gold,ess:bd.ess,reward:bd.reward,armor:0,atkDebuff:1};
   G.player.shield=0;G.locked=true;G.battleOver=false;G.playerStunned=false;G.castGen=0;
   if(G.playerStunTimer){clearTimeout(G.playerStunTimer);G.playerStunTimer=null;}
   G.eCastPct=0;G.eCastEl=null;G.eStunned=false;
@@ -3985,7 +4079,7 @@ function startBattle(idx){
     G.locked=false;
     var logMsg = icText(G.enemy.icKey)+'  '+G.enemy.n+' enters the field!';
     if(isBoss) logMsg = '⚠ BOSS: '+G.enemy.n+'!';
-    setLog(logMsg,'');
+    setLog(logMsg,'','enemy');
     startECast();
   });
 }
@@ -4004,10 +4098,16 @@ function showCountdown(enemy, cb){
       ov.classList.remove('show');
       // Spawn-pop the avatar
       var fig=document.getElementById('e-icon');
-      fig.innerHTML=IC[enemy.icKey];
+      // Initialize splash art if this enemy has one, else fallback emoji
+      initSplashScene(enemy.icKey);
+      if(!G_splash){
+        fig.innerHTML=IC[enemy.icKey];
+      }
       fig.classList.remove('avatar-spawn');void fig.offsetWidth;fig.classList.add('avatar-spawn');
       setTimeout(function(){fig.classList.remove('avatar-spawn');},600);
-      cb();return;
+      // Defer cb so the injected SVG is in the live DOM before startECast applies state
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ cb(); }); });
+      return;
     }
     cdNum.textContent=counts[ci];
     cdNum.classList.remove('cdNumPop');void cdNum.offsetWidth;
@@ -4042,8 +4142,20 @@ function bcReset(){
   var edgeIds=['el-top','el-bot','el-right','el-left'];for(var i=0;i<edgeIds.length;i++){var el2=document.getElementById(edgeIds[i]);if(el2)el2.classList.remove('lit');}
 }
 
+function bcSyncSize(){
+  var inn=document.getElementById('cf-inner');
+  if(!inn||!BC.cv)return;
+  var r=inn.getBoundingClientRect();
+  var w=Math.floor(r.width)||300,h=Math.floor(r.height)||150;
+  if(BC.cv.width!==w||BC.cv.height!==h){
+    BC.cv.width=w;BC.cv.height=h;BC.W=w;BC.H=h;
+    BC.ctx=BC.cv.getContext('2d');
+  }
+}
+
 function bcDown(x,y){
   if(G.battleOver||G.playerStunned)return;
+  bcSyncSize();
   clearTimeout(BC.fadeT);if(BC.ctx)BC.ctx.clearRect(0,0,BC.W,BC.H);BC.mid=null;
   document.getElementById('det-label').classList.remove('show');
   BC.el=detectEdge(x,y,BC.W,BC.H);BC.pts=[[x,y]];BC.drawing=true;particleAccum=0;
@@ -4061,9 +4173,9 @@ function bcUp(){
   if(!BC.drawing)return;BC.drawing=false;
   if(BC.pts.length<8){bcReset();return;}
   var el=BC.el;
-  if(!el){setLog('Start from edge: top=Air  bot=Earth  right=Fire  left=Water','');bcReset();return;}
+  if(!el){setLog('Start from edge: top=Air  bot=Earth  right=Fire  left=Water','','player');bcReset();return;}
   var allCands=[];var all=learnedList();for(var i=0;i<all.length;i++)if(SPELLS[all[i]].el===el)allCands.push(all[i]);
-  if(!allCands.length){setLog('No '+el+' spells known!','#c4952a');bcReset();return;}
+  if(!allCands.length){setLog('No '+el+' spells known!','#c4952a','player');bcReset();return;}
 
   // Detect stroke OD direction relative to element rules, filter candidates
   var strokeOD=detectStrokeOD(BC.pts,el);
@@ -4116,16 +4228,46 @@ function bcDraw(){
 function startECast(){
   if(!G.enemy||G.enemy.curHp<=0||G.eStunned||G.battleOver)return;
   clearInterval(G.eCastInterval);G.castGen++;var myGen=G.castGen;
-  G.eCastEl=G.enemy.atkEl;
+  // atkEls = multi-element enemy (picks randomly each cast); atkEl = single element
+  var els = G.enemy.atkEls || [G.enemy.atkEl];
+
+  // ── Universal enemy AI ──────────────────────────────────────
+  // Identify attack elements for this enemy (fire, earth-atk, or any non-defensive el)
+  var DAMAGE_ELS = ['fire','earth-atk'];
+  var atk0 = Math.round(G.enemy.atk*(G.enemy.atkDebuff||1));
+  var estDmg = Math.round(atk0*(1 - G.stats.dmgReduce)); // rough worst-case hit ignoring shield
+  var playerEHP = Math.max(0, G.player.hp + G.player.shield - estDmg);
+  var canKill = (G.player.hp - Math.max(0, estDmg - G.player.shield)) <= 0;
+  var hasAttackEl = els.some(function(e){ return DAMAGE_ELS.indexOf(e)>=0; });
+
+  // Build a filtered pool, applying rules
+  var pool = els.filter(function(e){
+    // Rule 1: if a kill shot is available, only pick attack elements
+    if(canKill && hasAttackEl) return DAMAGE_ELS.indexOf(e)>=0;
+    // Rule 2: no heal above 80% HP
+    if(e==='water' && G.enemy.curHp/G.enemy.hp > 0.80) return false;
+    // Rule 3: no shield (earth) if already armored
+    if(e==='earth' && G.enemy.armor>0) return false;
+    return true;
+  });
+  // Fallback: if all options filtered out (e.g. only heal available but full HP), use full pool
+  if(pool.length===0) pool = els;
+
+  G.eCastEl = pool[Math.floor(Math.random()*pool.length)];
+  // ────────────────────────────────────────────────────────────
   var totalTime = G.enemy.atkT * (1/G.eSlowMult);
   G.eCastTotal=totalTime;G.eCastPct=0;
   var bar=document.getElementById('e-cast');bar.className='cast-fill '+G.eCastEl;bar.style.width='0%';
-  if(!G.enemy.armor) setAvatarStatus('normal');
+  // Set casting splash state for creatures that have cast states
+  var elToCast={earth:'casting-q',air:'casting-e',water:'casting-w',fire:'casting-r','earth-atk':'casting-q-atk'};
+  var castState = elToCast[G.eCastEl] || 'normal';
+  setAvatarStatus(castState);
   // Counter tip
-  var counterEl=EL[G.eCastEl].counters;
+  var counterEl=EL[G.eCastEl]||EL['earth'];
   var msgs={
     air:'CC incoming! Counter with EARTH shield or AIR interrupt',
     earth:'Armoring! Counter with AIR to strip, or hit with FIRE',
+    'earth-atk':'Boulder slam! Counter with WATER shield or EARTH ward',
     fire:'Attack! Counter with WATER shield or EARTH ward',
     water:'Healing! Counter with FIRE damage now!'
   };
@@ -4147,24 +4289,31 @@ function enemyAttack(gen){
   if(el==='fire'){
     var dmg=Math.round(atk*(0.85+Math.random()*.3)*(1-G.stats.dmgReduce));
     // Apply hex: infernobrand reduces shield
-    if(G.player.shield>0){var abs=Math.min(G.player.shield,dmg);G.player.shield-=abs;dmg-=abs;if(dmg<=0){setLog(icText(G.enemy.icKey)+' attacks — shield absorbs it!','#30b4d8');shieldFlash('player');refreshBUI();setTimeout(startECast,1200);return;}}
+    if(G.player.shield>0){var abs=Math.min(G.player.shield,dmg);G.player.shield-=abs;dmg-=abs;if(dmg<=0){setLog(icText(G.enemy.icKey,'player')+' attacks — shield absorbs it!','#30b4d8','enemy');shieldFlash('player');refreshBUI();setTimeout(startECast,1200);return;}}
     G.player.hp=Math.max(0,G.player.hp-dmg);
-    setLog(icText(G.enemy.icKey)+' blasts for '+dmg+' fire damage!','#ff6030');
+    setLog(icText(G.enemy.icKey,'player')+' blasts for '+dmg+' fire damage!','#ff6030','enemy');
     spawnFx('#ff6030','player');dmgPop(dmg,'#ff6030','player');jitterScreen();damageFlash('player');flashOverlay('rgba(255,48,0,0.15)');
   } else if(el==='air'){
-    if(G.playerStunned){var sdmg=Math.round(atk*0.3*(1-G.stats.dmgReduce));G.player.hp=Math.max(0,G.player.hp-sdmg);setLog(icText(G.enemy.icKey)+' buffets while stunned for '+sdmg+'!','#7ecfff');spawnFx('#7ecfff','player');}
-    else{G.playerStunned=true;G.locked=true;if(G.playerStunTimer)clearTimeout(G.playerStunTimer);document.getElementById('stun-overlay').classList.add('show');setLog(icText(G.enemy.icKey)+' stuns you! Held 1.5s...','#7ecfff');spawnStunStars('player');flashOverlay('rgba(126,207,255,0.2)');G.playerStunTimer=setTimeout(function(){G.locked=false;G.playerStunned=false;document.getElementById('stun-overlay').classList.remove('show');setLog('You break free!','');},1500);}
+    if(G.playerStunned){var sdmg=Math.round(atk*0.3*(1-G.stats.dmgReduce));G.player.hp=Math.max(0,G.player.hp-sdmg);setLog(icText(G.enemy.icKey,'player')+' buffets while stunned for '+sdmg+'!','#7ecfff','enemy');spawnFx('#7ecfff','player');}
+    else{G.playerStunned=true;G.locked=true;if(G.playerStunTimer)clearTimeout(G.playerStunTimer);document.getElementById('stun-overlay').classList.add('show');setLog(icText(G.enemy.icKey,'player')+' stuns you! Held 1.5s...','#7ecfff','enemy');spawnStunStars('player');flashOverlay('rgba(126,207,255,0.2)');G.playerStunTimer=setTimeout(function(){G.locked=false;G.playerStunned=false;document.getElementById('stun-overlay').classList.remove('show');setLog('You break free!','','player');},1500);}
   } else if(el==='earth'){
-    G.enemy.armor=Math.round(atk*.4);addStatus('e-status',IC.shield_s+' Armored');setLog(icText(G.enemy.icKey)+' gains armor!','#c4952a');
-    setAvatarStatus('armored');
+    G.enemy.armor=Math.round(atk*.4);addStatus('e-status',IC.shield_s+' Armored');setLog(icText(G.enemy.icKey,'player')+' raises a stone barrier!','#c4952a','enemy');
+    setAvatarStatus('normal');
+  } else if(el==='earth-atk'){
+    var edmg=Math.round(atk*(0.8+Math.random()*.35)*(1-G.stats.dmgReduce));
+    if(G.player.shield>0){var eabs=Math.min(G.player.shield,edmg);G.player.shield-=eabs;edmg-=eabs;if(edmg<=0){setLog(icText(G.enemy.icKey,'player')+' hurls boulders — shield absorbs it!','#30b4d8','enemy');shieldFlash('player');refreshBUI();setTimeout(startECast,1400);return;}}
+    G.player.hp=Math.max(0,G.player.hp-edmg);
+    setLog(icText(G.enemy.icKey,'player')+' slams for '+edmg+' earth damage!','#c4952a','enemy');
+    spawnFx('#c4952a','player');dmgPop(edmg,'#c4952a','player');jitterScreen();damageFlash('player');flashOverlay('rgba(196,149,42,0.15)');
+    setAvatarStatus('normal');
   } else if(el==='water'){
     var h=Math.round(atk*.5);G.enemy.curHp=Math.min(G.enemy.hp,G.enemy.curHp+h);
-    setLog(icText(G.enemy.icKey)+' heals for '+h+'!','#30b4d8');spawnHealRings('enemy');spawnFx('#30b4d8','enemy');
-    setAvatarStatus('healing');setTimeout(function(){if(!G.eStunned&&!G.enemy.armor)setAvatarStatus('normal');},1200);
+    setLog(icText(G.enemy.icKey,'player')+' heals for '+h+'!','#30b4d8','enemy');spawnHealRings('enemy');spawnFx('#30b4d8','enemy');
+    setAvatarStatus('normal');
   }
   refreshBUI();
   if(G.player.hp<=0){setTimeout(battleLose,700);return;}
-  if(!G.battleOver&&G.player.hp>0){setTimeout(startECast,el==='air'?2800:1400);}
+  if(!G.battleOver&&G.player.hp>0){setTimeout(startECast,el==='air'?2800:(el==='earth-atk'?1400:1400));}
 }
 
 // ============================================================
@@ -4177,7 +4326,7 @@ function resolvePlayerSpell(id, score, t) {
 
   // MISCAST — no effect
   if(t.m===0){
-    setLog('MISCAST — '+sp.n+' fizzles! ('+score+'%)',  '#e84020');
+    setLog('MISCAST — '+sp.n+' fizzles! ('+score+'%)','#e84020','player');
     var ov2=document.getElementById('effect-overlay');if(ov2){ov2.style.background='rgba(232,64,32,0.12)';ov2.classList.remove('active','chain-flash');void ov2.offsetWidth;ov2.classList.add('active');setTimeout(function(){ov2.classList.remove('active');},400);}
     refreshBUI();
     return;
@@ -4186,7 +4335,7 @@ function resolvePlayerSpell(id, score, t) {
   // Counter bonus: +30% if your element counters the enemy's current cast
   var isCounter = (G.eCastEl && EL[sp.el].counters === G.eCastEl);
   var counterMult = isCounter ? 1.3 : 1.0;
-  if(isCounter) setLog('COUNTER BONUS! '+sp.n+' vs '+G.eCastEl+'! (+30%)','#f0c060');
+  if(isCounter) setLog('COUNTER BONUS! '+sp.n+' vs '+G.eCastEl+'! (+30%)','#f0c060','player');
 
   // Check for chain reaction before applying spell
   var chain = checkChain(sp.el);
@@ -4209,15 +4358,15 @@ function resolvePlayerSpell(id, score, t) {
     var elBonus=1+(G.stats.elDmgMult&&G.stats.elDmgMult[sp.el]?G.stats.elDmgMult[sp.el]:0);
     var dmg=Math.round(pw*18*G.stats.dmgMult*elBonus*counterMult*chainMult);
     // Pierce armor if thermal lance chain
-    if(G.chainBonus&&G.chainBonus.pierceArmor){G.enemy.armor=0;clearStatus('e-status',IC.shield_s+' Armored');setAvatarStatus('normal');}
-    if(G.enemy.armor>0){dmg=Math.max(1,dmg-G.enemy.armor);G.enemy.armor=0;clearStatus('e-status',IC.shield_s+' Armored');setAvatarStatus('normal');}
+    if(G.chainBonus&&G.chainBonus.pierceArmor){G.enemy.armor=0;clearStatus('e-status',IC.shield_s+' Armored');restoreCastState();}
+    if(G.enemy.armor>0){dmg=Math.max(1,dmg-G.enemy.armor);G.enemy.armor=0;clearStatus('e-status',IC.shield_s+' Armored');restoreCastState();}
     // Hex: brittle, frosthex, burnmark amplify
     var hexAmp=getHexAmp('dmg');dmg=Math.round(dmg*hexAmp);
     G.enemy.curHp=Math.max(0,G.enemy.curHp-dmg);
     var perfStr=t.m>=2?' DOUBLE!':'';
     var chainStr=chainMult>1?' (chain x'+chainMult.toFixed(1)+')':'';
     var counterS=isCounter?' ◈':'';
-    setLog(getSpellIcon(id)+' '+sp.n+' hits '+dmg+'!'+chainStr+counterS+perfStr+' ('+score+'%)',col.c);
+    setLog(getSpellIcon(id,'player')+' '+sp.n+' hits '+dmg+'!'+chainStr+counterS+perfStr+' ('+score+'%)',col.c);
     spawnFx(col.c,'enemy');dmgPop(dmg,col.c,'enemy');spawnImpactBurst(col.c,'enemy');damageFlash('enemy');flashOverlay('rgba(255,96,48,0.1)');
     avatarHit();
   }
@@ -4232,7 +4381,7 @@ function resolvePlayerSpell(id, score, t) {
     setTimeout(function(){if(intentEl3){intentEl3.textContent='';intentEl3.className='e-intent';}},800);
     addStatus('e-status',IC.stunned+' Stunned');
     var perfHex=t.m>=2?' DOUBLE INTERRUPT!':'';
-    setLog(getSpellIcon(id)+' '+sp.n+' INTERRUPTS! '+(stunMs/1000).toFixed(1)+'s'+perfHex+' ('+score+'%)',col.c);
+    setLog(getSpellIcon(id,'player')+' '+sp.n+' INTERRUPTS! '+(stunMs/1000).toFixed(1)+'s'+perfHex+' ('+score+'%)',col.c);
     interruptFlash();spawnStunStars('enemy');clearTimeout(G.eStunTimer);
     setAvatarStatus('stunned');
     // Strip armor on interrupt (petrify) or buff on interrupt (voidgale)
@@ -4249,14 +4398,14 @@ function resolvePlayerSpell(id, score, t) {
     if(G.chainBonus&&G.chainBonus.reflect){G.enemy.reflect=G.chainBonus.reflect;G.chainBonus=null;}
     G.player.shield=Math.min(G.player.maxShield,G.player.shield+sh);
     var perfSh=t.m>=2?' DOUBLE!':'';
-    setLog(getSpellIcon(id)+' '+sp.n+' shields +'+sh+'!'+perfSh+' ('+score+'%)',col.c);
+    setLog(getSpellIcon(id,'player')+' '+sp.n+' shields +'+sh+'!'+perfSh+' ('+score+'%)',col.c);
     shieldFlash('player');spawnFx(col.c,'player');
   }
   else if(sp.type==='heal'){
     var hp=Math.round(pw*15*G.stats.healMult*counterMult*chainMult);
     G.player.hp=Math.min(G.player.maxHp,G.player.hp+hp);
     var perfHl=t.m>=2?' DOUBLE!':'';
-    setLog(getSpellIcon(id)+' '+sp.n+' heals +'+hp+'!'+perfHl+' ('+score+'%)',col.c);
+    setLog(getSpellIcon(id,'player')+' '+sp.n+' heals +'+hp+'!'+perfHl+' ('+score+'%)',col.c);
     spawnHealRings('player');spawnFx(col.c,'player');
   }
   else if(sp.type==='enchant'){
@@ -4272,33 +4421,33 @@ function applyEnchant(id, sp, pw, counterMult, score, col){
   // Different enchants have different effects based on the spell id
   var effects={
     // Air enchants
-    windchant:  function(){G.enchantBonus={stat:'castSpeed',val:0.2,expires:Date.now()+dur};setLog(getSpellIcon(id)+' '+sp.n+'! Spell power +20% for '+(dur/1000).toFixed(1)+'s',col.c);},
-    mistform:   function(){G.enchantBonus={stat:'evade',val:0.2,expires:Date.now()+dur};addStatus('p-status','Evade');setLog(getSpellIcon(id)+' Mist Form! 20% evade '+(dur/1000).toFixed(1)+'s',col.c);},
-    slipstream2:function(){var bonus=0.15;G.stats.crBonus+=bonus;setTimeout(function(){G.stats.crBonus=Math.max(0,G.stats.crBonus-bonus);},dur);setLog(getSpellIcon(id)+' Swift Wings! +15% corridor '+(dur/1000).toFixed(1)+'s',col.c);},
-    aeroflow:   function(){G.chainBonus={type:'dmgMult',mult:1.3,expires:Date.now()+dur};setLog(getSpellIcon(id)+' Aero Flow! +30% next spell dmg',col.c);},
-    stormwall:  function(){G.enchantBonus={stat:'shieldHeal',val:0.25,expires:Date.now()+dur};setLog(getSpellIcon(id)+' Storm Wall! +25% shield & heal '+(dur/1000).toFixed(1)+'s',col.c);},
+    windchant:  function(){G.enchantBonus={stat:'castSpeed',val:0.2,expires:Date.now()+dur};setLog(getSpellIcon(id,'player')+' '+sp.n+'! Spell power +20% for '+(dur/1000).toFixed(1)+'s',col.c);},
+    mistform:   function(){G.enchantBonus={stat:'evade',val:0.2,expires:Date.now()+dur};addStatus('p-status','Evade');setLog(getSpellIcon(id,'player')+' Mist Form! 20% evade '+(dur/1000).toFixed(1)+'s',col.c);},
+    slipstream2:function(){var bonus=0.15;G.stats.crBonus+=bonus;setTimeout(function(){G.stats.crBonus=Math.max(0,G.stats.crBonus-bonus);},dur);setLog(getSpellIcon(id,'player')+' Swift Wings! +15% corridor '+(dur/1000).toFixed(1)+'s',col.c);},
+    aeroflow:   function(){G.chainBonus={type:'dmgMult',mult:1.3,expires:Date.now()+dur};setLog(getSpellIcon(id,'player')+' Aero Flow! +30% next spell dmg',col.c);},
+    stormwall:  function(){G.enchantBonus={stat:'shieldHeal',val:0.25,expires:Date.now()+dur};setLog(getSpellIcon(id,'player')+' Storm Wall! +25% shield & heal '+(dur/1000).toFixed(1)+'s',col.c);},
     // Earth enchants
-    stoneskin:  function(){G.stats.dmgReduce+=0.15;setTimeout(function(){G.stats.dmgReduce=Math.max(0,G.stats.dmgReduce-0.15);},dur);setLog(getSpellIcon(id)+' Stone Skin! -15% dmg taken '+(dur/1000).toFixed(1)+'s',col.c);},
-    earthward2: function(){G.stats.shMult+=0.2;setTimeout(function(){G.stats.shMult=Math.max(1,G.stats.shMult-0.2);},dur);setLog(getSpellIcon(id)+' Earth Ward! +20% shield power '+(dur/1000).toFixed(1)+'s',col.c);},
-    stonemantle:function(){G.enchantBonus={stat:'reflect',val:0.15,expires:Date.now()+dur};addStatus('p-status','Reflect');setLog(getSpellIcon(id)+' Stone Mantle! Reflect 15% dmg '+(dur/1000).toFixed(1)+'s',col.c);},
-    bedrock:    function(){var bonus=Math.round(G.player.maxHp*0.3);G.player.hp=Math.min(G.player.maxHp+bonus,G.player.hp+bonus);setTimeout(function(){G.player.hp=Math.min(G.player.maxHp,G.player.hp);},dur);setLog(getSpellIcon(id)+' Bedrock! +30% max HP '+(dur/1000).toFixed(1)+'s',col.c);},
-    marrowmend: function(){if(G.regenTimer)clearInterval(G.regenTimer);G.regenTimer=setInterval(function(){if(G.battleOver||G.player.hp<=0){clearInterval(G.regenTimer);return;}G.player.hp=Math.min(G.player.maxHp,G.player.hp+8);refreshBUI();},1000);setTimeout(function(){clearInterval(G.regenTimer);},dur);setLog(getSpellIcon(id)+' Marrow Mend! +8 HP/s for '+(dur/1000).toFixed(1)+'s',col.c);},
+    stoneskin:  function(){G.stats.dmgReduce+=0.15;setTimeout(function(){G.stats.dmgReduce=Math.max(0,G.stats.dmgReduce-0.15);},dur);setLog(getSpellIcon(id,'player')+' Stone Skin! -15% dmg taken '+(dur/1000).toFixed(1)+'s',col.c);},
+    earthward2: function(){G.stats.shMult+=0.2;setTimeout(function(){G.stats.shMult=Math.max(1,G.stats.shMult-0.2);},dur);setLog(getSpellIcon(id,'player')+' Earth Ward! +20% shield power '+(dur/1000).toFixed(1)+'s',col.c);},
+    stonemantle:function(){G.enchantBonus={stat:'reflect',val:0.15,expires:Date.now()+dur};addStatus('p-status','Reflect');setLog(getSpellIcon(id,'player')+' Stone Mantle! Reflect 15% dmg '+(dur/1000).toFixed(1)+'s',col.c);},
+    bedrock:    function(){var bonus=Math.round(G.player.maxHp*0.3);G.player.hp=Math.min(G.player.maxHp+bonus,G.player.hp+bonus);setTimeout(function(){G.player.hp=Math.min(G.player.maxHp,G.player.hp);},dur);setLog(getSpellIcon(id,'player')+' Bedrock! +30% max HP '+(dur/1000).toFixed(1)+'s',col.c);},
+    marrowmend: function(){if(G.regenTimer)clearInterval(G.regenTimer);G.regenTimer=setInterval(function(){if(G.battleOver||G.player.hp<=0){clearInterval(G.regenTimer);return;}G.player.hp=Math.min(G.player.maxHp,G.player.hp+8);refreshBUI();},1000);setTimeout(function(){clearInterval(G.regenTimer);},dur);setLog(getSpellIcon(id,'player')+' Marrow Mend! +8 HP/s for '+(dur/1000).toFixed(1)+'s',col.c);},
     // Fire enchants
-    flamemark:  function(){G.stats.dmgMult+=0.25;setTimeout(function(){G.stats.dmgMult=Math.max(1,G.stats.dmgMult-0.25);},dur);setLog(getSpellIcon(id)+' Flame Mark! +25% fire dmg '+(dur/1000).toFixed(1)+'s',col.c);},
-    cinderveil: function(){G.enchantBonus={stat:'burn',val:5,expires:Date.now()+dur};addStatus('p-status','Burn Aura');setLog(getSpellIcon(id)+' Cinder Veil! Burn-on-hit '+(dur/1000).toFixed(1)+'s',col.c);},
-    solarflare: function(){G.stats.dmgMult+=0.30;G.stats.healMult+=0.15;setTimeout(function(){G.stats.dmgMult=Math.max(1,G.stats.dmgMult-0.30);G.stats.healMult=Math.max(1,G.stats.healMult-0.15);},dur);setLog(getSpellIcon(id)+' Solar Flare! +30% power '+(dur/1000).toFixed(1)+'s',col.c);},
-    cindertouch:function(){G.stats.dmgMult+=0.20;G.stats.healMult+=0.20;setTimeout(function(){G.stats.dmgMult=Math.max(1,G.stats.dmgMult-0.20);G.stats.healMult=Math.max(1,G.stats.healMult-0.20);},dur);setLog(getSpellIcon(id)+' Cinder Touch! +20% dmg & heal '+(dur/1000).toFixed(1)+'s',col.c);},
-    moltenspear:function(){G.stats.dmgMult+=0.35;setTimeout(function(){G.stats.dmgMult=Math.max(1,G.stats.dmgMult-0.35);},dur);setLog(getSpellIcon(id)+' Molten Form! +35% all dmg '+(dur/1000).toFixed(1)+'s',col.c);},
+    flamemark:  function(){G.stats.dmgMult+=0.25;setTimeout(function(){G.stats.dmgMult=Math.max(1,G.stats.dmgMult-0.25);},dur);setLog(getSpellIcon(id,'player')+' Flame Mark! +25% fire dmg '+(dur/1000).toFixed(1)+'s',col.c);},
+    cinderveil: function(){G.enchantBonus={stat:'burn',val:5,expires:Date.now()+dur};addStatus('p-status','Burn Aura');setLog(getSpellIcon(id,'player')+' Cinder Veil! Burn-on-hit '+(dur/1000).toFixed(1)+'s',col.c);},
+    solarflare: function(){G.stats.dmgMult+=0.30;G.stats.healMult+=0.15;setTimeout(function(){G.stats.dmgMult=Math.max(1,G.stats.dmgMult-0.30);G.stats.healMult=Math.max(1,G.stats.healMult-0.15);},dur);setLog(getSpellIcon(id,'player')+' Solar Flare! +30% power '+(dur/1000).toFixed(1)+'s',col.c);},
+    cindertouch:function(){G.stats.dmgMult+=0.20;G.stats.healMult+=0.20;setTimeout(function(){G.stats.dmgMult=Math.max(1,G.stats.dmgMult-0.20);G.stats.healMult=Math.max(1,G.stats.healMult-0.20);},dur);setLog(getSpellIcon(id,'player')+' Cinder Touch! +20% dmg & heal '+(dur/1000).toFixed(1)+'s',col.c);},
+    moltenspear:function(){G.stats.dmgMult+=0.35;setTimeout(function(){G.stats.dmgMult=Math.max(1,G.stats.dmgMult-0.35);},dur);setLog(getSpellIcon(id,'player')+' Molten Form! +35% all dmg '+(dur/1000).toFixed(1)+'s',col.c);},
     // Water enchants
-    seaflow:    function(){G.stats.healMult+=0.20;setTimeout(function(){G.stats.healMult=Math.max(1,G.stats.healMult-0.20);},dur);setLog(getSpellIcon(id)+' Sea Flow! +20% heal power '+(dur/1000).toFixed(1)+'s',col.c);},
-    tidechant:  function(){if(G.regenTimer)clearInterval(G.regenTimer);G.regenTimer=setInterval(function(){if(G.battleOver||G.player.hp<=0){clearInterval(G.regenTimer);return;}G.player.hp=Math.min(G.player.maxHp,G.player.hp+5);refreshBUI();},1000);setTimeout(function(){clearInterval(G.regenTimer);},dur);setLog(getSpellIcon(id)+' Tide Chant! +5 HP/s for '+(dur/1000).toFixed(1)+'s',col.c);},
-    frostchant: function(){G.stats.dmgReduce+=0.20;setTimeout(function(){G.stats.dmgReduce=Math.max(0,G.stats.dmgReduce-0.20);},dur);setLog(getSpellIcon(id)+' Frost Chant! -20% dmg taken '+(dur/1000).toFixed(1)+'s',col.c);},
-    waterweave: function(){G.stats.shMult+=0.25;G.stats.healMult+=0.25;setTimeout(function(){G.stats.shMult=Math.max(1,G.stats.shMult-0.25);G.stats.healMult=Math.max(1,G.stats.healMult-0.25);},dur);setLog(getSpellIcon(id)+' Water Weave! +25% shield & heal '+(dur/1000).toFixed(1)+'s',col.c);},
-    crystalmend:function(){G.stats.healMult+=0.40;G.stats.shMult+=0.20;setTimeout(function(){G.stats.healMult=Math.max(1,G.stats.healMult-0.40);G.stats.shMult=Math.max(1,G.stats.shMult-0.20);},dur);setLog(getSpellIcon(id)+' Crystal Mend! +40% restoration '+(dur/1000).toFixed(1)+'s',col.c);}
+    seaflow:    function(){G.stats.healMult+=0.20;setTimeout(function(){G.stats.healMult=Math.max(1,G.stats.healMult-0.20);},dur);setLog(getSpellIcon(id,'player')+' Sea Flow! +20% heal power '+(dur/1000).toFixed(1)+'s',col.c);},
+    tidechant:  function(){if(G.regenTimer)clearInterval(G.regenTimer);G.regenTimer=setInterval(function(){if(G.battleOver||G.player.hp<=0){clearInterval(G.regenTimer);return;}G.player.hp=Math.min(G.player.maxHp,G.player.hp+5);refreshBUI();},1000);setTimeout(function(){clearInterval(G.regenTimer);},dur);setLog(getSpellIcon(id,'player')+' Tide Chant! +5 HP/s for '+(dur/1000).toFixed(1)+'s',col.c);},
+    frostchant: function(){G.stats.dmgReduce+=0.20;setTimeout(function(){G.stats.dmgReduce=Math.max(0,G.stats.dmgReduce-0.20);},dur);setLog(getSpellIcon(id,'player')+' Frost Chant! -20% dmg taken '+(dur/1000).toFixed(1)+'s',col.c);},
+    waterweave: function(){G.stats.shMult+=0.25;G.stats.healMult+=0.25;setTimeout(function(){G.stats.shMult=Math.max(1,G.stats.shMult-0.25);G.stats.healMult=Math.max(1,G.stats.healMult-0.25);},dur);setLog(getSpellIcon(id,'player')+' Water Weave! +25% shield & heal '+(dur/1000).toFixed(1)+'s',col.c);},
+    crystalmend:function(){G.stats.healMult+=0.40;G.stats.shMult+=0.20;setTimeout(function(){G.stats.healMult=Math.max(1,G.stats.healMult-0.40);G.stats.shMult=Math.max(1,G.stats.shMult-0.20);},dur);setLog(getSpellIcon(id,'player')+' Crystal Mend! +40% restoration '+(dur/1000).toFixed(1)+'s',col.c);}
   };
   var fn=effects[id];
   if(fn) fn();
-  else setLog(getSpellIcon(id)+' '+sp.n+' enchants you! ('+score+'%)',col.c);
+  else setLog(getSpellIcon(id,'player')+' '+sp.n+' enchants you! ('+score+'%)',col.c);
   spawnFx('#c080ff','player');
   var p=document.getElementById('p-icon');if(p){p.classList.remove('enchant-flash');void p.offsetWidth;p.classList.add('enchant-flash');setTimeout(function(){p.classList.remove('enchant-flash');},700);}
   flashOverlay('rgba(192,128,255,0.12)');
@@ -4332,29 +4481,240 @@ function refreshBUI(){
   document.getElementById('e-hp').style.width=Math.max(0,e.curHp/e.hp*100)+'%';
   document.getElementById('e-hp-txt').textContent=Math.max(0,e.curHp)+'/'+e.hp;
 }
-function setLog(msg,color){var el=document.getElementById('battle-log');el.innerHTML=msg;el.style.color=color||'';if(color){var _msg=msg;setTimeout(function(){if(el.innerHTML===_msg)el.style.color='';},2500);}}
+function setLog(msg,color,who){
+  // Keep hidden element updated for any legacy reads
+  var el=document.getElementById('battle-log');if(el)el.innerHTML=msg;
+  // Determine container: enemy msgs float in avatar-wrap, player/neutral in canvas
+  var isEnemy=(who==='enemy');
+  var fl=document.getElementById(isEnemy?'enemy-log-float':'battle-log-float');
+  if(!fl)fl=document.getElementById('battle-log-float');
+  if(!fl)return;
+  var d=document.createElement('div');
+  d.className='blog-msg';
+  d.innerHTML=msg;
+  d.style.color=color||'var(--text2)';
+  // Stack: enemy msgs rise from center of enemy panel, player from center of canvas
+  var existing=fl.querySelectorAll('.blog-msg');
+  var offset=50+existing.length*28; // % from top for enemy, px from bottom for player
+  if(isEnemy){
+    d.style.top='50%';
+    d.style.marginTop=(existing.length*28)+'px';
+  } else {
+    var baseBottom=60;
+    d.style.bottom=(baseBottom+existing.length*28)+'px';
+  }
+  fl.appendChild(d);
+  setTimeout(function(){if(d.parentNode)d.remove();},2000);
+}
+
+// ============================================================
+// CREATURE SPLASH SYSTEM
+// Registers rich SVG art + per-state config for enemies.
+// Universal states (stunned/armored/etc) share visual language.
+// Cast states (q/w/e/r) are unique per creature.
+// Add new creatures here; enemies without a splash use the
+// existing emoji+filter fallback automatically.
+// ============================================================
+var CREATURE_SPLASHES = {};
+
+// ── Thornling ──
+CREATURE_SPLASHES['thornling'] = {
+  // SVG art (injected into .splash-creature)
+  svg: '<svg viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="scbN" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#3a5c18"/><stop offset="40%" stop-color="#1e3a0a"/><stop offset="100%" stop-color="#0a1a04"/></radialGradient><radialGradient id="scbSt" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#182838"/><stop offset="40%" stop-color="#0d1a25"/><stop offset="100%" stop-color="#050c12"/></radialGradient><radialGradient id="scbDm" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#3a200e"/><stop offset="40%" stop-color="#201008"/><stop offset="100%" stop-color="#0e0604"/></radialGradient><radialGradient id="scbAr" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#2a2010"/><stop offset="40%" stop-color="#1c1608"/><stop offset="100%" stop-color="#0c0c04"/></radialGradient><radialGradient id="scbHl" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#183040"/><stop offset="40%" stop-color="#0e2030"/><stop offset="100%" stop-color="#061018"/></radialGradient><radialGradient id="scbHx" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#301020"/><stop offset="40%" stop-color="#1e0a14"/><stop offset="100%" stop-color="#0c0408"/></radialGradient><radialGradient id="scbDb" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#2c2210"/><stop offset="40%" stop-color="#1a1608"/><stop offset="100%" stop-color="#0a0a04"/></radialGradient><radialGradient id="scbDd" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#181818"/><stop offset="40%" stop-color="#0e0e0e"/><stop offset="100%" stop-color="#080808"/></radialGradient><radialGradient id="scbCR" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#3c280e"/><stop offset="40%" stop-color="#241608"/><stop offset="100%" stop-color="#100802"/></radialGradient><radialGradient id="sceN" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e0ff60"/><stop offset="50%" stop-color="#80d020"/><stop offset="100%" stop-color="#406010"/></radialGradient><radialGradient id="sceSt" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#c0e0ff"/><stop offset="50%" stop-color="#60a0e0"/><stop offset="100%" stop-color="#205090"/></radialGradient><radialGradient id="sceDm" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffb070"/><stop offset="50%" stop-color="#d05020"/><stop offset="100%" stop-color="#801808"/></radialGradient><radialGradient id="sceAr" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e0d080"/><stop offset="50%" stop-color="#c4952a"/><stop offset="100%" stop-color="#704010"/></radialGradient><radialGradient id="sceHl" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#80e8ff"/><stop offset="50%" stop-color="#30a8d0"/><stop offset="100%" stop-color="#105870"/></radialGradient><radialGradient id="sceHx" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff80d0"/><stop offset="50%" stop-color="#d030a0"/><stop offset="100%" stop-color="#701050"/></radialGradient><radialGradient id="sceDb" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffd080"/><stop offset="50%" stop-color="#d09020"/><stop offset="100%" stop-color="#704810"/></radialGradient><radialGradient id="sceDd" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#585858"/><stop offset="50%" stop-color="#2c2c2c"/><stop offset="100%" stop-color="#181818"/></radialGradient><radialGradient id="sceCR" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe060"/><stop offset="50%" stop-color="#e07010"/><stop offset="100%" stop-color="#802008"/></radialGradient><radialGradient id="sctN" cx="50%" cy="0%" r="80%"><stop offset="0%" stop-color="#5a8a20"/><stop offset="100%" stop-color="#1a3008"/></radialGradient><radialGradient id="sctAr" cx="50%" cy="0%" r="80%"><stop offset="0%" stop-color="#8aaa30"/><stop offset="100%" stop-color="#2a4a10"/></radialGradient><radialGradient id="sctHx" cx="50%" cy="0%" r="80%"><stop offset="0%" stop-color="#883070"/><stop offset="100%" stop-color="#301020"/></radialGradient><radialGradient id="sctDd" cx="50%" cy="0%" r="80%"><stop offset="0%" stop-color="#404040"/><stop offset="100%" stop-color="#181818"/></radialGradient><linearGradient id="scCrys" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4a820"/><stop offset="50%" stop-color="#c4952a"/><stop offset="100%" stop-color="#8a6010"/></linearGradient><linearGradient id="scMoss" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4a7a1a"/><stop offset="100%" stop-color="#2a4a0a"/></linearGradient><filter id="scGl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="scGlH" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g opacity=".9"><path d="M70 220 Q40 215 20 225 Q10 228 5 235" stroke="#1a3008" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M68 222 Q50 230 35 240" stroke="#1a3008" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M72 218 Q60 200 45 210 Q30 218 15 215" stroke="#2a4a10" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M130 220 Q160 215 180 225 Q190 228 195 235" stroke="#1a3008" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M132 222 Q150 230 165 240" stroke="#1a3008" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M128 218 Q140 200 155 210 Q170 218 185 215" stroke="#2a4a10" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M100 232 Q100 242 100 248" stroke="#2a4a10" stroke-width="6" stroke-linecap="round" fill="none"/></g><path d="M80 185 Q65 195 60 215 Q58 225 70 222 Q82 218 85 205" fill="url(#scbN)" id="sc-ll"/><path d="M120 185 Q135 195 140 215 Q142 225 130 222 Q118 218 115 205" fill="url(#scbN)" id="sc-lr"/><polygon points="62,195 55,188 60,200" fill="url(#sctN)" id="sc-tkl"/><polygon points="138,195 145,188 140,200" fill="url(#sctN)" id="sc-tkr"/><ellipse cx="100" cy="160" rx="42" ry="52" fill="url(#scbN)" id="sc-torso"/><ellipse cx="100" cy="150" rx="39" ry="18" fill="none" stroke="#162e06" stroke-width="2.5" opacity=".5"/><ellipse cx="100" cy="165" rx="40" ry="15" fill="none" stroke="#162e06" stroke-width="2" opacity=".4"/><ellipse cx="85" cy="155" rx="10" ry="6" fill="url(#scMoss)" opacity=".45" transform="rotate(-15 85 155)" id="sc-m1"/><ellipse cx="118" cy="168" rx="8" ry="5" fill="url(#scMoss)" opacity=".35" transform="rotate(10 118 168)" id="sc-m2"/><polygon points="58,145 42,138 56,155" fill="url(#sctN)" id="sc-tsl1"/><polygon points="60,158 43,153 59,168" fill="url(#sctN)" id="sc-tsl2"/><polygon points="61,170 46,167 62,178" fill="url(#sctN)" opacity=".8" id="sc-tsl3"/><polygon points="142,145 158,138 144,155" fill="url(#sctN)" id="sc-tsr1"/><polygon points="140,158 157,153 141,168" fill="url(#sctN)" id="sc-tsr2"/><polygon points="139,170 154,167 138,178" fill="url(#sctN)" opacity=".8" id="sc-tsr3"/><path d="M62 140 Q45 148 35 160 Q28 170 30 182 Q32 190 42 185 Q52 178 55 165 Q58 152 65 145" fill="url(#scbN)" id="sc-al"/><path d="M30 182 Q22 190 18 200" stroke="#2a4a10" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M32 185 Q26 196 24 205" stroke="#2a4a10" stroke-width="3.5" stroke-linecap="round" fill="none"/><path d="M38 183 Q36 195 38 205" stroke="#2a4a10" stroke-width="3" stroke-linecap="round" fill="none"/><polygon points="38,165 22,158 37,175" fill="url(#sctN)" id="sc-tal"/><path d="M138 140 Q155 148 165 160 Q172 170 170 182 Q168 190 158 185 Q148 178 145 165 Q142 152 135 145" fill="url(#scbN)" id="sc-ar"/><path d="M170 182 Q178 190 182 200" stroke="#2a4a10" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M168 185 Q174 196 176 205" stroke="#2a4a10" stroke-width="3.5" stroke-linecap="round" fill="none"/><path d="M162 183 Q164 195 162 205" stroke="#2a4a10" stroke-width="3" stroke-linecap="round" fill="none"/><polygon points="162,165 178,158 163,175" fill="url(#sctN)" id="sc-tar"/><ellipse cx="100" cy="120" rx="35" ry="25" fill="url(#scbN)" id="sc-sh"/><polygon points="65,112 52,98 68,118" fill="url(#sctN)" id="sc-tshl1"/><polygon points="68,105 58,88 72,112" fill="url(#sctN)" id="sc-tshl2"/><polygon points="135,112 148,98 132,118" fill="url(#sctN)" id="sc-tshr1"/><polygon points="132,105 142,88 128,112" fill="url(#sctN)" id="sc-tshr2"/><ellipse cx="100" cy="88" rx="30" ry="34" fill="url(#scbN)" id="sc-head"/><ellipse cx="88" cy="80" rx="8" ry="5" fill="url(#scMoss)" opacity=".45" transform="rotate(-20 88 80)" id="sc-hm1"/><ellipse cx="114" cy="82" rx="7" ry="4" fill="url(#scMoss)" opacity=".35" transform="rotate(15 114 82)" id="sc-hm2"/><polygon points="90,60 78,30 93,65" fill="url(#sctN)" opacity=".9" id="sc-crl"/><polygon points="110,60 122,30 107,65" fill="url(#sctN)" opacity=".9" id="sc-crr"/><polygon points="100,56 95,22 104,60" fill="url(#sctN)" id="sc-crc"/><polygon points="87,62 79,32 91,66" fill="url(#sctN)" id="sc-crml"/><polygon points="113,62 121,32 109,66" fill="url(#sctN)" id="sc-crmr"/><polygon points="76,70 62,44 80,74" fill="url(#sctN)" opacity=".85" id="sc-crol"/><polygon points="124,70 138,44 120,74" fill="url(#sctN)" opacity=".85" id="sc-cror"/><path d="M76 95 Q88 88 100 90 Q112 88 124 95" stroke="#1a3008" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="88" cy="100" rx="10" ry="8" fill="#060e02" id="sc-skl"/><ellipse cx="112" cy="100" rx="10" ry="8" fill="#060e02" id="sc-skr"/><ellipse cx="88" cy="100" rx="7" ry="5.5" fill="url(#sceN)" filter="url(#scGl)" id="sc-eyl"/><ellipse cx="112" cy="100" rx="7" ry="5.5" fill="url(#sceN)" filter="url(#scGl)" id="sc-eyr"/><rect x="86.5" y="95.5" width="3" height="9" rx="1.5" fill="#050d02" id="sc-pul"/><rect x="110.5" y="95.5" width="3" height="9" rx="1.5" fill="#050d02" id="sc-pur"/><ellipse cx="87" cy="99" rx="2" ry="2.5" fill="#d0ff50" opacity=".55" id="sc-gll"/><ellipse cx="111" cy="99" rx="2" ry="2.5" fill="#d0ff50" opacity=".55" id="sc-glr"/><path d="M82 120 Q88 115 94 118 Q100 122 106 118 Q112 115 118 120" stroke="#0e2004" stroke-width="2.5" fill="none" stroke-linecap="round" id="sc-mouth"/><polygon points="90,118 88,113 93,118" fill="#3a6012" opacity=".75" id="sc-t1"/><polygon points="100,119 99,113 102,119" fill="#3a6012" opacity=".75"/><polygon points="110,118 112,113 107,118" fill="#3a6012" opacity=".75" id="sc-t3"/><circle cx="100" cy="148" r="12" fill="none" stroke="#4a8015" stroke-width=".8" opacity=".55" id="sc-rno"/><circle cx="100" cy="148" r="8" fill="none" stroke="#6ab020" stroke-width=".6" opacity=".45" id="sc-rni"/><line x1="100" y1="136" x2="100" y2="160" stroke="#5aaa10" stroke-width=".8" opacity=".45"/><line x1="88" y1="148" x2="112" y2="148" stroke="#5aaa10" stroke-width=".8" opacity=".45"/><line x1="91.5" y1="139.5" x2="108.5" y2="156.5" stroke="#5aaa10" stroke-width=".8" opacity=".35"/><line x1="108.5" y1="139.5" x2="91.5" y2="156.5" stroke="#5aaa10" stroke-width=".8" opacity=".35"/><circle cx="100" cy="148" r="2.5" fill="#80d020" opacity=".65" filter="url(#scGl)" id="sc-rnc"/><!-- State FX --><g id="sc-fxArm" opacity="0"><polygon points="70,108 62,95 78,100 80,112" fill="url(#scCrys)" stroke="#e0c060" stroke-width=".8" opacity=".95"/><polygon points="130,108 138,95 122,100 120,112" fill="url(#scCrys)" stroke="#e0c060" stroke-width=".8" opacity=".95"/><polygon points="88,130 80,118 96,122 98,135" fill="url(#scCrys)" stroke="#e0c060" stroke-width=".8" opacity=".85"/><polygon points="112,130 120,118 104,122 102,135" fill="url(#scCrys)" stroke="#e0c060" stroke-width=".8" opacity=".85"/><polygon points="100,48 96,18 104,48" fill="url(#scCrys)" stroke="#e8d070" stroke-width=".8" opacity=".9"/><circle cx="71" cy="103" r="5" fill="#d4a820" opacity=".2" filter="url(#scGl)"/><circle cx="129" cy="103" r="5" fill="#d4a820" opacity=".2" filter="url(#scGl)"/></g><g id="sc-fxHex" opacity="0"><path d="M100 148 Q95 130 88 100" stroke="#ff40a0" stroke-width="1.2" fill="none" opacity=".6"/><path d="M100 148 Q105 130 112 100" stroke="#ff40a0" stroke-width="1.2" fill="none" opacity=".6"/><path d="M100 148 Q80 155 60 158" stroke="#cc2080" stroke-width=".9" fill="none" opacity=".5"/><path d="M100 148 Q120 155 140 158" stroke="#cc2080" stroke-width=".9" fill="none" opacity=".5"/><circle cx="100" cy="148" r="5" fill="#ff40a0" opacity=".5" filter="url(#scGl)"/><circle cx="88" cy="100" r="3" fill="#ff40a0" opacity=".4" filter="url(#scGl)"/><circle cx="112" cy="100" r="3" fill="#ff40a0" opacity=".4" filter="url(#scGl)"/></g><g id="sc-fxDebuff" opacity="0"><ellipse cx="100" cy="170" rx="35" ry="10" fill="rgba(200,140,30,.1)" stroke="#c48020" stroke-width=".8" opacity=".5"/><path d="M75 145 Q70 158 72 168" stroke="#c48020" stroke-width="1" fill="none" opacity=".45" stroke-dasharray="2 2"/><path d="M125 145 Q130 158 128 168" stroke="#c48020" stroke-width="1" fill="none" opacity=".45" stroke-dasharray="2 2"/></g><g id="sc-fxDmg" opacity="0"><path d="M85 60 L80 80 L88 90 L78 115" stroke="#ff4020" stroke-width="1.2" opacity=".7" stroke-linecap="round"/><path d="M80 80 L72 88" stroke="#ff4020" stroke-width=".8" opacity=".5" stroke-linecap="round"/><path d="M115 70 L120 95 L112 105 L118 130" stroke="#ff4020" stroke-width="1" opacity=".55" stroke-linecap="round"/><path d="M90 130 L84 148 L92 160 L86 178" stroke="#cc3010" stroke-width="1.3" opacity=".75" stroke-linecap="round"/><circle cx="83" cy="90" r="2.5" fill="#ff6030" opacity=".6"/><circle cx="91" cy="160" r="3" fill="#ff4020" opacity=".65"/></g><g id="sc-fxHeal" opacity="0"><path d="M100 215 Q100 180 100 148" stroke="#30b4d8" stroke-width="1.5" fill="none" opacity=".5"/><path d="M85 200 Q88 175 90 148" stroke="#30b4d8" stroke-width=".8" fill="none" opacity=".35"/><circle cx="100" cy="148" r="14" fill="rgba(48,180,216,.12)" stroke="#30b4d8" stroke-width=".8" opacity=".6" filter="url(#scGl)"/><circle cx="100" cy="148" r="4" fill="#60d0f0" opacity=".8" filter="url(#scGl)"/></g><g id="sc-fxQ" opacity="0"><path d="M22 190 Q-2 182 -14 200 Q-22 216 -8 222 Q8 226 22 210 Q38 194 52 192" stroke="#5aaa10" stroke-width="4" stroke-linecap="round" fill="none" opacity=".9"/><polygon points="-5,208 -14,202 -2,216" fill="#5aaa10" opacity=".8"/><circle cx="-8" cy="222" r="8" fill="#80d020" opacity=".3" filter="url(#scGlH)"/></g><g id="sc-fxW" opacity="0"><ellipse cx="100" cy="130" rx="56" ry="72" fill="none" stroke="#a0c840" stroke-width="1.5" opacity=".6" stroke-dasharray="5 3"/><ellipse cx="100" cy="130" rx="50" ry="65" fill="rgba(80,140,20,.07)" stroke="#c0e050" stroke-width=".8" opacity=".45"/><path d="M50 90 Q60 80 70 90" stroke="#a0c840" stroke-width="1.5" fill="none" opacity=".55"/><path d="M130 90 Q140 80 150 90" stroke="#a0c840" stroke-width="1.5" fill="none" opacity=".55"/></g><g id="sc-fxE" opacity="0"><circle cx="100" cy="100" r="40" fill="rgba(140,200,20,.05)" stroke="#a0c820" stroke-width=".7" opacity=".5"/><circle cx="58" cy="78" r="12" fill="rgba(120,200,10,.1)" stroke="#80b010" stroke-width=".8" opacity=".7"/><circle cx="146" cy="88" r="10" fill="rgba(120,200,10,.1)" stroke="#80b010" stroke-width=".8" opacity=".6"/><circle cx="52" cy="68" r="3" fill="#c0e020" opacity=".7" filter="url(#scGl)"/><circle cx="150" cy="74" r="2.5" fill="#c0e020" opacity=".65" filter="url(#scGl)"/></g><g id="sc-fxR" opacity="0"><path d="M100 215 Q58 218 18 230" stroke="#ff8020" stroke-width="3" stroke-linecap="round" fill="none" opacity=".8"/><path d="M100 215 Q142 218 182 230" stroke="#ff8020" stroke-width="3" stroke-linecap="round" fill="none" opacity=".8"/><polygon points="38,218 33,194 45,218" fill="#c05010" opacity=".9"/><polygon points="65,222 59,199 72,222" fill="#d06018" opacity=".85"/><polygon points="135,222 128,199 141,222" fill="#d06018" opacity=".85"/><polygon points="162,218 155,194 167,218" fill="#c05010" opacity=".9"/><ellipse cx="100" cy="220" rx="62" ry="12" fill="#ff6010" opacity=".18" filter="url(#scGlH)"/><ellipse cx="100" cy="130" rx="48" ry="58" fill="none" stroke="#ff9030" stroke-width="1.5" opacity=".45" stroke-dasharray="6 4"/><circle cx="100" cy="148" r="16" fill="none" stroke="#ff9020" stroke-width="1.5" opacity=".55" filter="url(#scGl)"/><circle cx="100" cy="148" r="4.5" fill="#ffb030" opacity=".9" filter="url(#scGlH)"/></g></svg>',
+
+  // Body parts driven by state
+  bodyIds: ['sc-ll','sc-lr','sc-torso','sc-al','sc-ar','sc-sh','sc-head'],
+  thornIds: ['sc-tkl','sc-tkr','sc-tsl1','sc-tsl2','sc-tsl3','sc-tsr1','sc-tsr2','sc-tsr3','sc-tal','sc-tar','sc-tshl1','sc-tshl2','sc-tshr1','sc-tshr2','sc-crl','sc-crr','sc-crc','sc-crml','sc-crmr','sc-crol','sc-cror'],
+  eyeIds:   ['sc-eyl','sc-eyr'],
+  pupilIds: ['sc-pul','sc-pur'],
+  gleamIds: ['sc-gll','sc-glr'],
+  sockIds:  ['sc-skl','sc-skr'],
+  toothIds: ['sc-t1','sc-t3'],
+  mossIds:  ['sc-m1','sc-m2','sc-hm1','sc-hm2'],
+  fxIds:    ['sc-fxArm','sc-fxHex','sc-fxDebuff','sc-fxDmg','sc-fxHeal','sc-fxQ','sc-fxW','sc-fxE','sc-fxR'],
+
+  // Universal + cast state configs
+  // Keys: body,eye,thorn,pupil,gleam,gleamOp,sock,tooth,mossOp,
+  //       mouth,eyeRx,eyeRy,eyeCy,
+  //       sky,beam,cglow,sporeCol,anim,filter,
+  //       stunStars,interruptRing,healRings,hexPar,debPar,deathOv,
+  //       fxArm,fxHex,fxDebuff,fxDmg,fxHeal,fxQ,fxW,fxE,fxR,
+  //       runeCol,runeOcol,runeIcol
+  states: {
+    normal:      {body:'scbN', eye:'sceN', thorn:'sctN', pupil:'#050d02',gleam:'#d0ff50',gleamOp:.55,sock:'#060e02',tooth:'#3a6012',mossOp:.45,mouth:'M82 120 Q88 115 94 118 Q100 122 106 118 Q112 115 118 120',eyeRx:7,eyeRy:5.5,eyeCy:100,sky:'radial-gradient(ellipse at 50% 20%,#0d1f05 0%,#040a02 60%,#020604 100%)',beam:'linear-gradient(180deg,rgba(120,200,40,.08) 0%,rgba(80,160,20,.12) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(80,180,20,.4) 0%,transparent 70%)',sporeCol:'rgba(140,220,60,.9)',anim:'scBreath 4s ease-in-out infinite',filter:'none',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#80d020',runeOcol:'#4a8015',runeIcol:'#6ab020'},
+    stunned:     {body:'scbSt',eye:'sceSt',thorn:'sctN', pupil:'#02081a',gleam:'#a0c8ff',gleamOp:.9, sock:'#040818',tooth:'#2a3060',mossOp:.2, mouth:'M86 122 Q90 125 94 122 Q100 120 106 122 Q110 125 114 122',eyeRx:6,eyeRy:2.8,eyeCy:102,sky:'radial-gradient(ellipse at 50% 20%,#030a1c 0%,#020610 60%,#010408 100%)',beam:'linear-gradient(180deg,rgba(60,120,255,.1) 0%,rgba(40,90,210,.14) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(60,120,255,.4) 0%,transparent 70%)',sporeCol:'rgba(80,140,255,.7)',anim:'none',filter:'brightness(.75) saturate(.35) hue-rotate(160deg)',stunStars:1,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#4060c0',runeOcol:'#203880',runeIcol:'#3050a0'},
+    interrupted: {body:'scbSt',eye:'sceSt',thorn:'sctN', pupil:'#020816',gleam:'#80b8ff',gleamOp:.85,sock:'#040814',tooth:'#203055',mossOp:.25,mouth:'M84 121 Q88 118 93 120 Q100 124 107 120 Q112 118 116 121',eyeRx:7,eyeRy:4,eyeCy:101,sky:'radial-gradient(ellipse at 50% 20%,#04091a 0%,#020610 60%,#010408 100%)',beam:'linear-gradient(180deg,rgba(50,110,240,.1) 0%,rgba(30,80,200,.12) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(50,110,240,.35) 0%,transparent 70%)',sporeCol:'rgba(70,130,240,.6)',anim:'none',filter:'brightness(.8) saturate(.4) hue-rotate(150deg)',stunStars:0,interruptRing:1,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#4060b8',runeOcol:'#1e3878',runeIcol:'#2d4e98'},
+    damaged:     {body:'scbDm',eye:'sceDm',thorn:'sctN', pupil:'#150200',gleam:'#ff9060',gleamOp:.7, sock:'#0e0400',tooth:'#7a2010',mossOp:.15,mouth:'M82 122 Q86 117 90 121 Q96 126 100 121 Q108 115 118 120',eyeRx:7.5,eyeRy:6,eyeCy:100,sky:'radial-gradient(ellipse at 50% 20%,#1c0501 0%,#0e0201 60%,#060101 100%)',beam:'linear-gradient(180deg,rgba(255,60,20,.1) 0%,rgba(210,40,10,.13) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(255,50,10,.4) 0%,transparent 70%)',sporeCol:'rgba(255,80,30,.5)',anim:'scSway 3.5s ease-in-out infinite',filter:'none',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:1,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#c04010',runeOcol:'#802008',runeIcol:'#a03010'},
+    armored:     {body:'scbAr',eye:'sceAr',thorn:'sctAr',pupil:'#0a0800',gleam:'#e0c860',gleamOp:.85,sock:'#0a0a04',tooth:'#8a7010',mossOp:.55,mouth:'M82 120 Q88 115 94 118 Q100 122 106 118 Q112 115 118 120',eyeRx:7,eyeRy:5.5,eyeCy:100,sky:'radial-gradient(ellipse at 50% 20%,#121008 0%,#080604 60%,#040402 100%)',beam:'linear-gradient(180deg,rgba(200,160,40,.08) 0%,rgba(160,120,20,.12) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(196,149,42,.45) 0%,transparent 70%)',sporeCol:'rgba(200,160,40,.6)',anim:'scBreath 3s ease-in-out infinite',filter:'none',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:1,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#d4a820',runeOcol:'#906010',runeIcol:'#b08018'},
+    healing:     {body:'scbHl',eye:'sceHl',thorn:'sctN', pupil:'#001018',gleam:'#70d8f8',gleamOp:.9, sock:'#001018',tooth:'#107080',mossOp:.5, mouth:'M82 120 Q88 117 94 120 Q100 122 106 120 Q112 117 118 120',eyeRx:7.5,eyeRy:6,eyeCy:99,sky:'radial-gradient(ellipse at 50% 20%,#031218 0%,#020810 60%,#010508 100%)',beam:'linear-gradient(180deg,rgba(48,180,216,.1) 0%,rgba(30,140,180,.13) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(48,180,216,.45) 0%,transparent 70%)',sporeCol:'rgba(48,180,216,.7)',anim:'scBob 2s ease-in-out infinite',filter:'none',stunStars:0,interruptRing:0,healRings:1,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:1,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#30c0e0',runeOcol:'#106080',runeIcol:'#2090b0'},
+    hexed:       {body:'scbHx',eye:'sceHx',thorn:'sctHx',pupil:'#200010',gleam:'#ff60c0',gleamOp:.9, sock:'#180010',tooth:'#881050',mossOp:.1, mouth:'M82 120 Q86 123 90 120 Q95 116 100 120 Q105 124 110 120 Q114 123 118 120',eyeRx:7,eyeRy:5.5,eyeCy:100,sky:'radial-gradient(ellipse at 50% 20%,#160510 0%,#0c0308 60%,#060206 100%)',beam:'linear-gradient(180deg,rgba(255,60,160,.09) 0%,rgba(200,40,130,.12) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(255,60,160,.4) 0%,transparent 70%)',sporeCol:'rgba(255,60,160,.7)',anim:'scShiver 1.8s ease-in-out infinite',filter:'brightness(.85) hue-rotate(20deg)',stunStars:0,interruptRing:0,healRings:0,hexPar:1,debPar:0,deathOv:0,fxArm:0,fxHex:1,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#ff40a0',runeOcol:'#881050',runeIcol:'#cc2080'},
+    debuffed:    {body:'scbDb',eye:'sceDb',thorn:'sctN', pupil:'#100c00',gleam:'#e0a840',gleamOp:.65,sock:'#100c00',tooth:'#806010',mossOp:.3, mouth:'M84 121 Q89 118 94 120 Q100 122 106 120 Q111 118 116 121',eyeRx:6.5,eyeRy:4.5,eyeCy:101,sky:'radial-gradient(ellipse at 50% 20%,#100e06 0%,#080604 60%,#040402 100%)',beam:'linear-gradient(180deg,rgba(200,140,30,.07) 0%,rgba(160,110,20,.1) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(200,140,30,.3) 0%,transparent 70%)',sporeCol:'rgba(200,140,30,.5)',anim:'scSag 3s ease-in-out infinite',filter:'brightness(.88) saturate(.65)',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:1,deathOv:0,fxArm:0,fxHex:0,fxDebuff:1,fxDmg:0,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#c09020',runeOcol:'#705010',runeIcol:'#a07818'},
+    dead:        {body:'scbDd',eye:'sceDd',thorn:'sctDd',pupil:'#0a0a0a',gleam:'#303030',gleamOp:.3, sock:'#080808',tooth:'#282828',mossOp:.06,mouth:'M84 121 Q90 127 100 125 Q110 127 116 121',eyeRx:6,eyeRy:2,eyeCy:102,sky:'radial-gradient(ellipse at 50% 20%,#0a0a0a 0%,#060606 60%,#030303 100%)',beam:'linear-gradient(180deg,rgba(60,60,60,.04) 0%,rgba(40,40,40,.06) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(40,40,40,.3) 0%,transparent 70%)',sporeCol:'rgba(80,80,80,.3)',anim:'none',filter:'grayscale(1) brightness(.42) saturate(0)',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:1,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#303030',runeOcol:'#202020',runeIcol:'#282828'},
+    // Cast states (Thornling-specific)
+    'casting-q': {body:'scbN', eye:'sceN', thorn:'sctN', pupil:'#030c00',gleam:'#e0ff50',gleamOp:1,  sock:'#060e02',tooth:'#4a7018',mossOp:.5, mouth:'M80 119 Q86 112 94 116 Q100 120 106 116 Q114 112 120 119',eyeRx:8.5,eyeRy:7,eyeCy:99,sky:'radial-gradient(ellipse at 50% 20%,#0d1f05 0%,#040a02 60%,#020604 100%)',beam:'linear-gradient(180deg,rgba(120,200,40,.12) 0%,rgba(80,160,20,.18) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(80,200,20,.6) 0%,transparent 70%)',sporeCol:'rgba(140,220,60,.9)',anim:'scCharge 1.2s ease-in-out infinite',filter:'none',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:1,fxW:0,fxE:0,fxR:0,runeCol:'#a0e020',runeOcol:'#5a9010',runeIcol:'#80c018'},
+    'casting-w': {body:'scbN', eye:'sceN', thorn:'sctAr',pupil:'#050b00',gleam:'#d0f040',gleamOp:.9, sock:'#060e02',tooth:'#3a6012',mossOp:.5, mouth:'M82 120 Q88 116 94 119 Q100 122 106 119 Q112 116 118 120',eyeRx:7.5,eyeRy:6,eyeCy:100,sky:'radial-gradient(ellipse at 50% 20%,#0a1c04 0%,#060e02 60%,#030802 100%)',beam:'linear-gradient(180deg,rgba(160,200,40,.1) 0%,rgba(120,180,20,.14) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(160,200,40,.5) 0%,transparent 70%)',sporeCol:'rgba(160,210,40,.8)',anim:'scCharge 1.6s ease-in-out infinite',filter:'none',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:0,fxW:1,fxE:0,fxR:0,runeCol:'#b0d828',runeOcol:'#6a9010',runeIcol:'#90b820'},
+    'casting-e': {body:'scbN', eye:'sceN', thorn:'sctN', pupil:'#080a00',gleam:'#d8ff10',gleamOp:1,  sock:'#060e02',tooth:'#3a6012',mossOp:.5, mouth:'M82 120 Q88 115 94 118 Q100 122 106 118 Q112 115 118 120',eyeRx:9,eyeRy:7.5,eyeCy:99,sky:'radial-gradient(ellipse at 50% 20%,#121c02 0%,#080c01 60%,#040601 100%)',beam:'linear-gradient(180deg,rgba(180,220,10,.12) 0%,rgba(140,190,10,.16) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(180,220,10,.55) 0%,transparent 70%)',sporeCol:'rgba(200,240,10,.85)',anim:'scCharge .8s ease-in-out infinite',filter:'none',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:0,fxW:0,fxE:1,fxR:0,runeCol:'#c0e010',runeOcol:'#708008',runeIcol:'#a0c010'},
+    'casting-r': {body:'scbCR',eye:'sceCR',thorn:'sctN', pupil:'#180400',gleam:'#ffb040',gleamOp:1,  sock:'#100400',tooth:'#a04010',mossOp:.2, mouth:'M80 117 Q85 108 93 113 Q100 118 107 113 Q115 108 120 117',eyeRx:10,eyeRy:8,eyeCy:98,sky:'radial-gradient(ellipse at 50% 20%,#1c0a02 0%,#100501 60%,#080301 100%)',beam:'linear-gradient(180deg,rgba(255,120,20,.16) 0%,rgba(255,80,10,.2) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(255,100,10,.7) 0%,transparent 70%)',sporeCol:'rgba(255,100,20,.7)',anim:'scShake .12s ease-in-out infinite',filter:'none',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:0,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:1,runeCol:'#ff9020',runeOcol:'#a04808',runeIcol:'#d06810'},
+    'casting-q-atk': {body:'scbAr',eye:'sceDm',thorn:'sctAr',pupil:'#120800',gleam:'#e08010',gleamOp:1,sock:'#0e0800',tooth:'#a06010',mossOp:.15,mouth:'M80 116 Q85 106 93 111 Q100 116 107 111 Q115 106 120 116',eyeRx:11,eyeRy:6,eyeCy:100,sky:'radial-gradient(ellipse at 50% 20%,#1a1000 0%,#0e0800 60%,#060400 100%)',beam:'linear-gradient(180deg,rgba(196,130,20,.2) 0%,rgba(160,100,10,.26) 30%,transparent 100%)',cglow:'radial-gradient(ellipse,rgba(200,120,10,.75) 0%,transparent 70%)',sporeCol:'rgba(196,149,42,.85)',anim:'scShake .18s ease-in-out infinite',filter:'brightness(1.1) saturate(1.4)',stunStars:0,interruptRing:0,healRings:0,hexPar:0,debPar:0,deathOv:0,fxArm:0,fxHex:0,fxDebuff:0,fxDmg:1,fxHeal:0,fxQ:0,fxW:0,fxE:0,fxR:0,runeCol:'#d08010',runeOcol:'#805008',runeIcol:'#b06810'},
+  }
+};
+
+// ── Splash runtime state ──
+var G_splash = null; // current creature splash def, or null
+var G_splashSporesInit = false;
+
+function initSplashScene(icKey) {
+  var def = CREATURE_SPLASHES[icKey];
+  var wrap  = document.getElementById('avatar-wrap');
+  var body  = document.getElementById('avatar-body');
+  var scene = document.getElementById('splash-scene');
+  var fig   = document.getElementById('e-icon');
+  if (!def) {
+    // No splash — normal emoji mode
+    G_splash = null;
+    wrap.classList.remove('splash-mode');
+    if(body)  body.style.display  = '';
+    scene.style.display = 'none';
+    fig.style.display   = '';
+    return;
+  }
+  G_splash = def;
+  wrap.classList.add('splash-mode');
+  if(body)  body.style.display  = 'none';
+  scene.style.display = 'block';
+  fig.style.display   = 'none';
+  // Inject creature SVG
+  document.getElementById('splash-creature').innerHTML = def.svg;
+  var sporeC = document.getElementById('splash-spores');
+  sporeC.innerHTML = '';
+  for (var i = 0; i < 18; i++) {
+    var sp = document.createElement('div');
+    sp.className = 'splash-spore';
+    var sz = Math.random()*2.5+1, l = Math.random()*100, d = Math.random()*7, dur = Math.random()*5+4, dx = (Math.random()-.5)*50;
+    sp.style.cssText = 'width:'+sz+'px;height:'+sz+'px;left:'+l+'%;bottom:-5%;--sdx:'+dx+'px;animation-duration:'+dur+'s;animation-delay:-'+d+'s;opacity:'+(Math.random()*.5+.3)+';';
+    sporeC.appendChild(sp);
+  }
+  // Generate hex particles
+  var hexC = document.getElementById('splash-hex-par');
+  hexC.innerHTML = '';
+  for (var j = 0; j < 14; j++) {
+    var hp = document.createElement('div'); hp.className = 'shp';
+    var hsz = Math.random()*3.5+1.5, hl = 25+Math.random()*50, ht = 20+Math.random()*60, hdur = Math.random()*1.8+1.2, hd = Math.random()*2;
+    hp.style.cssText = 'width:'+hsz+'px;height:'+hsz+'px;left:'+hl+'%;top:'+ht+'%;background:radial-gradient(circle,rgba(255,60,160,.9),rgba(180,20,100,.3));animation-duration:'+hdur+'s;animation-delay:-'+hd+'s;filter:blur(.5px);';
+    hexC.appendChild(hp);
+  }
+  // Generate debuff particles
+  var debC = document.getElementById('splash-debuff-par');
+  debC.innerHTML = '';
+  for (var k = 0; k < 10; k++) {
+    var dp = document.createElement('div'); dp.className = 'sdp';
+    var dw = Math.random()*1.5+.8, dh = Math.random()*7+3, dl = 20+Math.random()*60, dt = Math.random()*35, ddur = Math.random()*1.3+.8, dd = Math.random()*2;
+    dp.style.cssText = 'width:'+dw+'px;height:'+dh+'px;left:'+dl+'%;top:'+dt+'%;background:rgba(200,140,30,.6);animation-duration:'+ddur+'s;animation-delay:-'+dd+'s;';
+    debC.appendChild(dp);
+  }
+  // Re-measure canvas after layout shift from showing splash panel
+  requestAnimationFrame(function(){ if(typeof initBC === 'function') initBC(); });
+}
+
+function applySplashState(state) {
+  if (!G_splash) return;
+  var def = G_splash;
+  var cfg = def.states[state] || def.states['normal'];
+  // Query inside the actual SVG element
+  var svgEl = document.querySelector('#splash-creature svg');
+  if (!svgEl) return;
+
+  function setFill(id, grad) { var e = svgEl.getElementById ? svgEl.getElementById(id) : svgEl.querySelector('#'+id); if(!e) e = document.getElementById(id); if(e) e.setAttribute('fill','url(#'+grad+')'); }
+  function setAttr(id, attr, val) { var e = svgEl.getElementById ? svgEl.getElementById(id) : svgEl.querySelector('#'+id); if(!e) e = document.getElementById(id); if(e) e.setAttribute(attr, String(val)); }
+
+  def.bodyIds.forEach(function(id){ setFill(id, cfg.body); });
+  def.thornIds.forEach(function(id){ setFill(id, cfg.thorn); });
+  def.eyeIds.forEach(function(id){
+    setFill(id, cfg.eye);
+    setAttr(id, 'rx', cfg.eyeRx); setAttr(id, 'ry', cfg.eyeRy); setAttr(id, 'cy', cfg.eyeCy);
+  });
+  def.sockIds.forEach(function(id){ setAttr(id, 'cy', cfg.eyeCy); });
+  def.pupilIds.forEach(function(id){ setAttr(id, 'fill', cfg.pupil); setAttr(id, 'y', cfg.eyeCy - 4.5); });
+  def.gleamIds.forEach(function(id){ setAttr(id, 'fill', cfg.gleam); setAttr(id, 'opacity', cfg.gleamOp); setAttr(id, 'cy', cfg.eyeCy - 1); });
+  def.toothIds.forEach(function(id){ setAttr(id, 'fill', cfg.tooth); });
+  def.mossIds.forEach(function(id){ setAttr(id, 'opacity', cfg.mossOp); });
+  setAttr('sc-mouth', 'd', cfg.mouth);
+  setAttr('sc-rnc', 'fill', cfg.runeCol);
+  setAttr('sc-rno', 'stroke', cfg.runeOcol);
+  setAttr('sc-rni', 'stroke', cfg.runeIcol);
+
+  var fxKeys = ['fxArm','fxHex','fxDebuff','fxDmg','fxHeal','fxQ','fxW','fxE','fxR'];
+  var fxIds  = ['sc-fxArm','sc-fxHex','sc-fxDebuff','sc-fxDmg','sc-fxHeal','sc-fxQ','sc-fxW','sc-fxE','sc-fxR'];
+  fxKeys.forEach(function(k,i){
+    var e = svgEl.querySelector ? svgEl.querySelector('#'+fxIds[i]) : null;
+    if(!e) e = document.getElementById(fxIds[i]);
+    if(e) e.setAttribute('opacity', cfg[k]);
+  });
+
+  // Scene background & glow
+  document.getElementById('splash-bg').style.background   = cfg.sky;
+  document.getElementById('splash-beam').style.background = cfg.beam;
+  document.getElementById('splash-glow').style.background = cfg.cglow;
+  document.querySelectorAll('.splash-spore').forEach(function(sp){ sp.style.background = 'radial-gradient(circle,'+cfg.sporeCol+',rgba(0,0,0,0))'; });
+
+  // Creature animation & filter
+  var cr = document.getElementById('splash-creature');
+  cr.style.filter = cfg.filter;
+  cr.style.animation = 'none';
+  if (state === 'stunned') {
+    cr.style.transform = 'translateX(-50%) rotate(-12deg) translateY(8px)';
+  } else if (state === 'dead') {
+    cr.style.transform = 'translateX(-50%) rotate(-22deg) translateY(14px) scaleY(.92)';
+  } else {
+    cr.style.transform = 'translateX(-50%)';
+    void cr.offsetWidth;
+    cr.style.animation = cfg.anim;
+  }
+
+  // Universal indicators
+  document.getElementById('splash-stun-stars').classList.toggle('show',    !!cfg.stunStars);
+  document.getElementById('splash-interrupt-ring').classList.toggle('show', !!cfg.interruptRing);
+  document.getElementById('splash-heal-ring').classList.toggle('show',      !!cfg.healRings);
+  document.getElementById('splash-hex-par').classList.toggle('show',        !!cfg.hexPar);
+  document.getElementById('splash-debuff-par').classList.toggle('show',     !!cfg.debPar);
+  document.getElementById('splash-death-ov').classList.toggle('show',       !!cfg.deathOv);
+}
+
+// Restore the correct state based on current battle conditions.
+// Use this instead of setAvatarStatus('normal') during active combat.
+function restoreCastState(){
+  if(G.eStunned){setAvatarStatus('stunned');return;}
+  var elToCast={earth:'casting-q',air:'casting-e',water:'casting-w',fire:'casting-r','earth-atk':'casting-q-atk'};
+  var castState = (G.eCastEl && !G.battleOver) ? (elToCast[G.eCastEl]||'normal') : 'normal';
+  setAvatarStatus(castState);
+}
 
 function setAvatarStatus(state){
-  var ring=document.getElementById('avatar-ring');
-  var fig=document.getElementById('e-icon');
-  var lbl=document.getElementById('avatar-status-lbl');
-  var stars=document.getElementById('avatar-stars');
+  var ring  = document.getElementById('avatar-ring');
+  var fig   = document.getElementById('e-icon');
+  var lbl   = document.getElementById('avatar-status-lbl');
+  var stars = document.getElementById('avatar-stars');
   if(!ring||!fig||!lbl)return;
-  // Clear old state classes
-  var states=['normal','stunned','interrupted','armored','healing','hexed','debuffed'];
+  // Only normal, stunned, and cast states are active; all others collapse to normal
+  var validStates=['normal','stunned','casting-q','casting-q-atk','casting-w','casting-e','casting-r','dead'];
+  if(validStates.indexOf(state)<0) state='normal';
+  var allStates=['normal','stunned','casting-q','casting-q-atk','casting-w','casting-e','casting-r','dead'];
   ring.className='avatar-ring '+state;
   lbl.className='avatar-status-lbl '+state;
-  fig.classList.remove.apply(fig.classList,states.map(function(s){return 's-'+s;}));
+  fig.classList.remove.apply(fig.classList,allStates.map(function(s){return 's-'+s;}));
   if(state!=='normal') fig.classList.add('s-'+state);
   stars.classList.toggle('show', state==='stunned');
-  var labels={normal:'READY',stunned:'✦ STUNNED ✦',interrupted:'INTERRUPTED',armored:'◆ ARMORED',healing:'▲ HEALING',hexed:'✦ HEXED ✦',debuffed:'▼ WEAKENED'};
+  var labels={normal:'READY',stunned:'✦ STUNNED ✦','casting-q':'CASTING','casting-q-atk':'ATTACKING','casting-w':'CASTING','casting-e':'CASTING','casting-r':'CASTING',dead:'DEFEATED'};
   lbl.textContent=labels[state]||state.toUpperCase();
+  // Drive splash art if active
+  if(G_splash) applySplashState(state);
 }
 
 function avatarHit(){
   var fig=document.getElementById('e-icon');if(!fig)return;
   fig.classList.remove('avatar-hit');void fig.offsetWidth;fig.classList.add('avatar-hit');
   setTimeout(function(){fig.classList.remove('avatar-hit');},400);
+  // No special splash state on hit — normal resumes
 }
 function addStatus(cid,txt){var c=document.getElementById(cid);if(!c)return;var ch=c.children;for(var i=0;i<ch.length;i++)if(ch[i].getAttribute('data-stxt')===txt)return;var s=document.createElement('span');s.className='sicon';s.setAttribute('data-stxt',txt);s.innerHTML=txt;c.appendChild(s);}
 function clearStatus(cid,txt){var c=document.getElementById(cid);if(!c)return;var ch=Array.prototype.slice.call(c.children);for(var i=0;i<ch.length;i++)if(ch[i].getAttribute('data-stxt')===txt)ch[i].remove();}
@@ -4362,6 +4722,7 @@ function clearStatus(cid,txt){var c=document.getElementById(cid);if(!c)return;va
 function battleWin(){
   if(G.battleOver)return;G.battleOver=true;
   clearInterval(G.eCastInterval);clearInterval(G.regenTimer);G.locked=true;
+  setAvatarStatus('dead');
   var bd=G.enemy,drops=[];
   var gold=bd.gold[0]+Math.floor(Math.random()*(bd.gold[1]-bd.gold[0]+1));
   G.gold+=gold;drops.push({ic:'gold',n:'Gold',q:gold});
@@ -4441,7 +4802,7 @@ function spawnHealRings(who){var el=document.getElementById(who==='enemy'?'e-ico
 function spawnStunStars(who){var el=document.getElementById(who==='enemy'?'e-icon':'p-icon');if(!el)return;var r=el.getBoundingClientRect();var cx=r.left+r.width/2,cy=r.top-5;var symbols=['*','+','*','+','*'];for(var i=0;i<5;i++){var star=document.createElement('div');star.className='stun-star';var angle=(i/5)*Math.PI*2;var ox=Math.cos(angle)*18,oy=Math.sin(angle)*10;star.textContent=symbols[i];star.style.cssText='left:'+(cx+ox)+'px;top:'+(cy+oy)+'px;color:#7ecfff;animation-delay:'+(i*0.08)+'s;font-size:.9rem;';document.body.appendChild(star);setTimeout(function(s){if(s.parentNode)s.remove();},1200,star);}}
 function shieldFlash(who){var el=document.getElementById(who==='enemy'?'e-icon':'p-icon');if(!el)return;el.classList.remove('shield-flash');void el.offsetWidth;el.classList.add('shield-flash');setTimeout(function(){el.classList.remove('shield-flash');},600);flashOverlay('rgba(48,180,216,0.15)');}
 function damageFlash(who){var el=document.getElementById(who==='enemy'?'e-hp':'p-hp');if(!el)return;el.classList.remove('hp-flash');void el.offsetWidth;el.classList.add('hp-flash');setTimeout(function(){el.classList.remove('hp-flash');},350);}
-function interruptFlash(){var ov=document.getElementById('effect-overlay');if(!ov)return;ov.style.background='rgba(126,207,255,.25)';ov.classList.remove('active','interrupt-flash');void ov.offsetWidth;ov.classList.add('interrupt-flash');setAvatarStatus('interrupted');setTimeout(function(){if(G.eStunned)setAvatarStatus('stunned');},600);}
+function interruptFlash(){var ov=document.getElementById('effect-overlay');if(!ov)return;ov.style.background='rgba(126,207,255,.25)';ov.classList.remove('active','interrupt-flash');void ov.offsetWidth;ov.classList.add('interrupt-flash');setAvatarStatus('stunned');setTimeout(function(){if(!G.eStunned)restoreCastState();},600);}
 function spawnImpactBurst(color,who){var el=document.getElementById(who==='enemy'?'e-icon':'p-icon');if(!el)return;var r=el.getBoundingClientRect();var cx=r.left+r.width/2,cy=r.top+r.height/2;for(var i=0;i<8;i++){var line=document.createElement('div');var angle=(i/8)*360;line.style.cssText='position:fixed;left:'+cx+'px;top:'+cy+'px;width:3px;height:'+(8+Math.random()*16)+'px;background:'+color+';transform-origin:0 0;transform:rotate('+angle+'deg);border-radius:2px;pointer-events:none;z-index:450;box-shadow:0 0 4px '+color+';animation:fxUp .5s ease-out forwards;animation-delay:'+(Math.random()*.05)+'s;';document.body.appendChild(line);setTimeout(function(ln){if(ln.parentNode)ln.remove();},600,line);}}
 function spawnFx(color,who){var el=document.getElementById(who==='enemy'?'e-icon':'p-hp');if(!el)return;var r=el.getBoundingClientRect();for(var i=0;i<10;i++){var p=document.createElement('div');p.className='particle';var sz=4+Math.random()*8;p.style.cssText='left:'+(r.left+Math.random()*r.width)+'px;top:'+(r.top+Math.random()*r.height)+'px;width:'+sz+'px;height:'+sz+'px;background:'+color+';box-shadow:0 0 '+sz+'px '+color+';animation-delay:'+(Math.random()*.2)+'s;';document.body.appendChild(p);setTimeout(function(){p.remove();},1500);}}
 function dmgPop(dmg,color,who){if(G.battleOver)return;var el=document.getElementById(who==='enemy'?'e-icon':'p-hp');if(!el)return;var r=el.getBoundingClientRect();var p=document.createElement('div');p.className='dmg-pop';p.textContent='-'+dmg;p.style.cssText='left:'+(r.left+r.width/2-14)+'px;top:'+(r.top-10)+'px;color:'+color+';font-size:1.4rem;';document.body.appendChild(p);setTimeout(function(){if(p.parentNode)p.remove();},1100);}
